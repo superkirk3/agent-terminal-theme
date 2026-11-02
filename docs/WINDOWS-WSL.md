@@ -80,7 +80,22 @@ agent-theme set --agent codex --cast ryoma --style card
 agent-theme sessions  # 菜单中也可直接选择某个 Session 单独切换
 ```
 
-偏好保存在 WSL 的用户目录中，与 Mac 分开。显式的角色/布局环境变量仍会覆盖保存值，详见 [配置说明](CONFIGURATION.md)。
+偏好保存在 WSL 的用户目录中，与 Mac 分开。优先级为会话级覆盖、环境变量、客户端默认值，详见 [配置说明](CONFIGURATION.md)。
+
+### 加入自己的 snippet 选择器
+
+仓库提供可执行入口 [examples/snippets/agent-theme](../examples/snippets/agent-theme)。安装主题后，把它复制到自己的 snippet 工具目录。例如使用 `~/snippets/` 时：
+
+```sh
+mkdir -p "$HOME/snippets"
+cp examples/snippets/agent-theme "$HOME/snippets/agent-theme"
+chmod 700 "$HOME/snippets/agent-theme"
+"$HOME/snippets/agent-theme"
+```
+
+该入口打开交互菜单，可选择单个 Session；也支持 `sessions`、`set --session` 等参数。将选择器的新条目设为执行 `"$HOME/snippets/agent-theme"` 即可。现有选择器的配置方式各不相同，请保留原来的其他工具入口。
+
+旧版 Codex HUD 需要先执行一次 `"$HOME/snippets/agent-theme" refresh`，仅更新显示进程，保留 Codex 会话与任务。
 
 Windows Terminal 的真实图片路径要求终端支持 SIXEL，且 tmux **编译启用了 SIXEL**。在 tmux 中检查：
 

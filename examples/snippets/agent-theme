@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Codex / Claude session theme menu; extra arguments are passed through.
+set -euo pipefail
+
+theme_script="$HOME/.local/share/agent-theme/theme.py"
+if [[ ! -r "$theme_script" ]]; then
+    printf '%s\n' 'Install agent-terminal-theme before using this snippet.' >&2
+    exit 1
+fi
+
+exec python3 "$theme_script" "$@"
