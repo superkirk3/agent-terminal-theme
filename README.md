@@ -80,7 +80,24 @@ agent-theme reset                                  # 恢复两者的会话随机
 
 从另一个终端标签或 tmux 面板执行即可。**已运行的状态栏会在下次刷新时读取选择，无需中断任务**；命令只保存显示偏好，不重启客户端。选择保存在本机 `~/.config/agent-theme/preferences.json`，更新和卸载都会保留。
 
-环境变量仍然优先于保存的选择，适合单次覆盖：
+### 只切换某个 session
+
+运行 `agent-theme` 后可在菜单中直接选择某一行 **Session**，也可以用命令操作。将下面的 `SESSION_ID` 替换为列表中的完整 ID 或唯一前缀：
+
+```sh
+agent-theme sessions
+agent-theme set --session SESSION_ID --cast gojo --style pill
+agent-theme show --session SESSION_ID
+agent-theme reset --session SESSION_ID
+```
+
+这些操作只修改目标会话的显示偏好，不改变客户端默认主题或其他会话。会话级设置优先于环境变量，所以已经运行且固定了角色的会话也能单独切换。`reset --session` 只移除该会话的覆盖，让它重新继承环境变量及默认主题。
+
+如果两个客户端的 ID 重复，添加 `--agent codex` 或 `--agent claude`；前缀不唯一时命令会拒绝修改。列表显示最近两分钟刷新过的主题会话，`agent-theme sessions --all` 可查看旧记录，`--json` 可供脚本读取。
+
+Codex 会在确认进程归属后显示真实 session ID；无法确认时显示该窗口独有的 HUD ID，可直接用它切换当前窗口。不会根据项目路径猜测会话。真实 ID 的设置可在恢复同一会话时继续生效；HUD ID 针对当前 HUD 实例。更多说明见 [会话识别](docs/CONFIGURATION.md#会话识别与刷新)。
+
+环境变量仍然优先于客户端默认选择，适合单次覆盖；显式会话覆盖具有更高优先级：
 
 ```sh
 # 单次指定
@@ -98,9 +115,9 @@ AGENT_THEME_WINDOWS_TEXT=1 codex
 
 布局：`mecha`、`minimal`、`card`、`pill`；默认随机选择并尽量在同一会话中保持稳定。素材含多种状态，缺少的状态会使用回退动画。
 
-`--cast random` / `--style random` 表示按会话自动选择。若之前在 shell 中 `export` 了角色或布局，`agent-theme show` 会提示覆盖；去掉相应变量后启动新会话，才能让该会话跟随保存的默认选择。
+`--cast random` / `--style random` 表示按会话自动选择。若之前在 shell 中 `export` 了角色或布局，`agent-theme show` 会提示覆盖。可以用 `--session` 直接覆盖指定会话；若要让整个客户端跟随默认值，需去掉这些变量后启动新会话。
 
-旧版本没有 `agent-theme` 命令时，先按下节更新并重新运行安装器。升级后需要重新启动一次 Codex HUD，加载新的渲染代码；之后切换主题无需重启。选择 `--shell none` 的用户可以直接执行 `python3 "$HOME/.local/share/agent-theme/theme.py"`，参数相同。
+从旧版升级时，先按下节更新安装，再运行 `agent-theme refresh` 加载新的 Codex HUD 代码。它只刷新经验证的主题渲染面板，保留 Codex 主进程及任务；之后切换主题无需刷新面板或重启会话。Claude 状态栏会在下次调用时加载新代码。选择 `--shell none` 的用户可以直接执行 `python3 "$HOME/.local/share/agent-theme/theme.py"`，参数相同。
 
 详细变量和指标含义见 [配置说明](docs/CONFIGURATION.md)。
 
@@ -111,6 +128,8 @@ AGENT_THEME_WINDOWS_TEXT=1 codex
 ```sh
 git pull --ff-only
 python3 install.py --codex --claude
+. "$HOME/.local/share/agent-theme/shell.sh"
+agent-theme refresh
 
 # 卸载两个入口，或加 --codex / --claude 只卸载其中之一
 python3 uninstall.py

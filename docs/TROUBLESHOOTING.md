@@ -19,6 +19,14 @@ codex --version
 
 选择同时覆盖中文与 Nerd Font 字符的字体，并确认实际生效的是终端当前 profile 的字体。使用支持 UTF-8、真彩色的终端；tmux 可用 `tmux -u` 启动。终端过窄时，布局会裁剪字段。
 
+## 指定 session 后主题没有变化
+
+先用 `agent-theme sessions` 选择主题实际显示的 ID。两个客户端有相同 ID 或前缀不唯一时，加 `--agent codex` / `--agent claude` 或使用完整 ID。Codex 无法确认真实 ID 时会显示独立的 HUD ID，此时可以直接用 HUD ID 定位该窗口。
+
+旧版 Codex 主题进程尚不能读取会话设置时，更新安装后运行 `agent-theme refresh`。它只刷新验证过的显示进程，保留正在工作的 Codex 主进程。如果显示刷新数量为 0，表示没有找到可验证的主题面板；检查安装路径及对应 tmux server，避免对未知面板执行强制重启。
+
+用 `agent-theme show --session SESSION_ID` 查看已保存的覆盖，用 `agent-theme reset --session SESSION_ID` 让该会话恢复继承默认值。会话级覆盖高于环境变量；不带 `--session` 的修改只改变客户端默认值，不会清除已有的会话级选择。
+
 ## 图片缺失、残影或大小异常
 
 先查 README 的能力表。Windows Claude / Rex Claude 的字符头像是当前设计的回退路径。Windows Codex 需要 tmux 的 `sixel_support` 为 `1`。

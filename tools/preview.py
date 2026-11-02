@@ -24,7 +24,7 @@ def main():
             'permission_mode': 'default', '_agent': 'codex',
             '_activity_state': 'WORKING', '_cast_state': 'think',
             '_display_label': 'WORKING', '_tokens_per_second': 12.3,
-            '_image_protocol': ''}
+            '_image_protocol': '', '_theme_register': False}
     print(statusline.render(data, time.time()))
 
 

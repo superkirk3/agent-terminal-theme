@@ -15,7 +15,8 @@ import time
 import unicodedata
 import zlib
 
-from theme_config import STYLES, effective_preferences
+from theme_config import STYLES, effective_preferences, session_key
+import theme_sessions
 
 
 RESET = "\x1b[0m"
@@ -795,11 +796,20 @@ def terminal_dimensions():
 
 def render(data, now=None, forced=None):
     now = time.time() if now is None else now
-    selection = effective_preferences('codex' if data.get('_agent') == 'codex' else 'claude')
+    agent = 'codex' if data.get('_agent') == 'codex' else 'claude'
+    try:
+        identity = session_key(agent, data.get('session_id', ''))
+        aliases = [session_key(agent, value) for value in data.get('_theme_session_aliases', [])]
+    except (ValueError, TypeError):
+        identity, aliases = '', []
+    selection = effective_preferences(agent, session_id=identity, session_aliases=aliases)
     columns, lines = terminal_dimensions()
     enabled = not os.environ.get("NO_COLOR") and os.environ.get("TERM") != "dumb"
     workspace = data.get("workspace") or {}
     cwd = workspace.get("current_dir") or data.get("cwd") or ""
+    if identity and data.get('_theme_register', True):
+        theme_sessions.register(agent, identity, cwd, selection, aliases,
+                                observer=data.get('_theme_observer'))
     model_data = data.get("model") or {}
     model = model_data.get("display_name") or "Unknown"
     effort_data = data.get("effort") or {}

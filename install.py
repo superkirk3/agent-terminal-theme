@@ -11,9 +11,9 @@ import sys
 import tempfile
 
 SOURCE = Path(__file__).resolve().parent
-RUNTIME = ('statusline.py', 'codex-launch.py', 'codex-hud.py', 'codex-pane.py',
+RUNTIME = ('theme_config.py', 'theme_sessions.py', 'theme_refresh.py', 'theme.py', 'statusline.py', 'codex-launch.py', 'codex-hud.py', 'codex-pane.py',
            'codex_hud_status.py', 'portable_images.py', 'sixel_frames.py',
-           'native_avatar.py', 'native_hud.py', 'shell.sh', 'theme.py', 'theme_config.py', 'cast.json',
+           'native_avatar.py', 'native_hud.py', 'shell.sh', 'cast.json',
            'naruto-quotes.json', 'naruto-sprites.json')
 BEGIN = '# >>> agent-terminal-theme >>>'
 END = '# <<< agent-terminal-theme <<<'

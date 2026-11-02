@@ -10,7 +10,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 EXCLUDED = {'.git', '__pycache__', '.venv', 'venv'}
-PRIVATE_NAMES = {'auth.json', 'credentials.json', '.credentials.json', 'install.json', 'preferences.json',
+PRIVATE_NAMES = {'auth.json', 'credentials.json', '.credentials.json', 'install.json', 'preferences.json', 'preferences.json.lock',
                  'settings.json', 'config.toml', '.env', 'id_rsa', 'id_ed25519'}
 PATTERNS = {
     'private key': rb'-----BEGIN (?:[A-Z ]+ )?PRIVATE KEY-----',
@@ -75,7 +75,7 @@ def main():
     findings = []
     count = 0
     for relative, symlink, raw in files:
-        if relative.name in PRIVATE_NAMES or any(part in {'.ssh', '.aws', '.alicloud', 'backups', 'verification'} for part in relative.parts):
+        if relative.name in PRIVATE_NAMES or any(part in {'.ssh', '.aws', '.alicloud', 'backups', 'verification', 'session-registry'} for part in relative.parts):
             findings.append((relative, 'private file category'))
         if symlink:
             findings.append((relative, 'symlink requires manual review'))

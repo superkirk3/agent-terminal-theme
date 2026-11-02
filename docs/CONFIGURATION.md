@@ -11,11 +11,48 @@ agent-theme show
 agent-theme reset --agent claude
 ```
 
-选择只保存在本机，不上传或跨机器同步。角色和布局可以分别修改；`--agent all` 是默认值，会更新两个客户端的对应字段。`reset` 清除所选客户端的保存值，不移除环境变量。
+选择只保存在本机，不上传或跨机器同步。角色和布局可以分别修改；不带 `--session` 时，`--agent all` 是默认值，会更新两个客户端的默认字段。`reset` 清除所选客户端的默认值，不移除环境变量，也不删除会话级覆盖。
 
-优先级：**该客户端的环境变量 → 保存的选择 → 会话随机选择**。Codex 使用 `AGENT_THEME_CAST` / `AGENT_THEME_STYLE`，Claude 使用 `CLAUDE_STATUSLINE_CAST` / `CLAUDE_STATUSLINE_STYLE`，两者互不覆盖。
+优先级：**指定 session 的覆盖 → 该客户端的环境变量 → 客户端保存的默认选择 → 会话随机选择**。按字段分别继承，例如只改某个会话的角色，不会改它的布局。Codex 使用 `AGENT_THEME_CAST` / `AGENT_THEME_STYLE`，Claude 使用 `CLAUDE_STATUSLINE_CAST` / `CLAUDE_STATUSLINE_STYLE`，两者互不覆盖。
 
-每次渲染都会重新读取偏好，已经运行的 HUD/状态栏也能切换。首次从旧版升级时，先重新启动一次 Codex HUD 以加载新代码。若会话启动时带有显式环境变量，该进程会保留它们；需要不带这些变量启动新会话后，才能跟随保存值。主题偏好文件损坏时，运行中的状态栏回退到默认值；切换命令会报错且不覆盖原文件，修正或移走损坏文件后再设置。
+每次渲染都会重新读取偏好，已经运行的 HUD/状态栏也能切换。会话级覆盖能够覆盖该进程已有的角色/布局环境变量。主题偏好文件损坏时，运行中的状态栏回退到默认值；切换命令会报错且不覆盖原文件，修正或移走损坏文件后再设置。
+
+## 指定某个 session
+
+```sh
+agent-theme sessions                    # 最近刷新过的会话
+agent-theme sessions --agent codex --all # 包含 Codex 的旧记录
+agent-theme sessions --json
+```
+
+复制需要修改的会话 ID，替换下面的 `SESSION_ID`：
+
+```sh
+agent-theme set --session SESSION_ID --cast luffy --style mecha
+agent-theme set --agent claude --session SESSION_ID --style card
+agent-theme show --session SESSION_ID
+agent-theme reset --session SESSION_ID
+```
+
+`--session` 支持唯一前缀，完整 ID 优先匹配。如果同一个 ID 同时属于 Codex 和 Claude，必须指定客户端；歧义不会触发批量修改。可用 `codex:SESSION_ID` 或 `claude:SESSION_ID` 明确客户端，也可用 `--agent` 和完整 ID 预先设置尚未出现在列表中的会话。
+
+会话覆盖保存于同一份本机偏好文件，按客户端和会话 ID 分开。它不会修改其他会话或客户端默认值；更新、部分卸载都不会删除它。并发修改使用文件锁及原子替换，避免两个终端的操作相互覆盖。
+
+### 会话识别与刷新
+
+Claude 使用状态栏 JSON 提供的 `session_id`。Codex 优先验证 TUI 进程树实际打开的 CLI 会话文件；WSL 使用 `/proc`，macOS 使用系统的 `lsof`。未能确认真实 ID 时，保留独立的 HUD ID，不按同一项目目录猜测归属。默认 HUD 编号使用随机值，避免进程号复用造成设置串用。
+
+真实 ID 的设置会在恢复同一会话后继续生效；HUD ID 只对应当前显示实例。之前按 HUD ID 保存的设置，在该 HUD 识别出真实 ID 后仍有效。一个真实会话如果在多个窗口打开，真实 ID 的覆盖会作用于这些窗口。
+
+会话列表是主题渲染器的本机刷新记录，不是进程存活证明。默认显示最近 120 秒内刷新的记录；暂停或退出的会话可以通过 `--all` 找到，恢复后继续使用保存的主题。目录、ID 和刷新时间只保存在本机。
+
+旧版 Codex HUD 尚不能注册 ID 时，安装新版后执行一次：
+
+```sh
+agent-theme refresh
+```
+
+该命令只重新启动确认仍在运行的 `codex-pane.py` 显示进程，不向 Codex 输入命令，不重启 Codex 主进程，也不清理 tmux server。恢复出来的空闲 shell 和无关 Python 面板会跳过。之后运行 `agent-theme sessions` 或菜单即可选择原来正在运行的会话。Claude 不需要此操作，会在下一次状态栏调用时加载新代码。
 
 ## 常用环境变量
 
@@ -50,10 +87,13 @@ Claude 接收官方状态栏 JSON；Codex 读取本机 `CODEX_HOME`（默认 `~/
 | 位置 | 内容 |
 | --- | --- |
 | `~/.local/share/agent-theme/` | 主题代码、素材和独立 Codex 入口 |
-| `~/.config/agent-theme/preferences.json` | 两个客户端分别保存的角色和布局，权限 600 |
+| `~/.config/agent-theme/preferences.json` | 客户端默认值与会话级角色/布局，权限 600 |
+| `~/.local/state/agent-theme/session-registry/` | 会话 ID、项目目录、刷新时间及显示选择，目录 700、文件 600 |
 | `~/.local/state/agent-theme/install.json` | 本机安装记录与原 Codex 路径，权限 600 |
 | `~/.local/state/agent-theme/backups/` | 本机配置备份，目录权限 700 |
 | `~/.claude/settings.json` | 合并后的 `statusLine` 配置 |
 | 所选 shell 启动文件 | 仅添加带标记的主题加载块 |
 
 安装记录和备份在仓库之外。不要把这些真实文件加入 Git。
+
+使用 `AGENT_THEME_PREFERENCES` 指定独立偏好文件时，刷新记录会放在它旁边的 `session-registry/`，便于不同配置各自列出会话。

@@ -11,6 +11,7 @@ import zlib
 import codex_hud_status as counters
 import portable_images as graphics
 import statusline as theme
+import theme_sessions
 from sixel_frames import render_frame
 
 BASE = Path(__file__).resolve().parent
@@ -81,6 +82,7 @@ def main():
     p.add_argument('--outer-pane', default='')
     p.add_argument('--native-state', default='')
     p.add_argument('--watch-socket', default='')
+    p.add_argument('--owner-pid', type=int, default=0)
     args = p.parse_args()
     args.log = None
     home = Path(os.environ.get('CODEX_HOME', Path.home()/'.codex'))
@@ -106,6 +108,7 @@ def main():
     image_cells = (10,20)
     placed_image = None
     placed_layers = 1
+    session_identity = args.session_id or args.instance
     sys.stdout.buffer.write(b'\x1b[2J\x1b[H\x1b[?25l')
     try:
         while True:
@@ -117,6 +120,8 @@ def main():
                 graphics.tmux('resize-pane', '-t', os.environ['TMUX_PANE'], '-y', '5')
             if now >= next_state:
                 state = counters.current_state(args, now, home)
+                owned = theme_sessions.owned_codex_session(args.owner_pid, home)
+                session_identity = owned or args.session_id or args.instance
                 next_state = now+.9
             if not text_only and (now >= next_origin or size != last_size):
                 coordinates = origin(args)
@@ -127,7 +132,9 @@ def main():
                 next_origin = now+2
                 last_size = size
             os.environ['COLUMNS'] = str(max(60, size.columns+(12 if native else 0)))
-            data = snapshot(state, args.cwd, args.session_id or args.instance, now)
+            data = snapshot(state, args.cwd, session_identity, now)
+            data['_theme_session_aliases'] = [args.instance]
+            data['_theme_observer'] = args.instance
             text = theme.render(data, now)
             rows = text.splitlines()[:5]
             out = b''

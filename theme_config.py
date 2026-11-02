@@ -1,12 +1,25 @@
 """Shared, local-only theme preferences; reread on each status refresh."""
 import json
+import fcntl
 import os
 from pathlib import Path
+import re
 import tempfile
 
 STYLES = ('mecha', 'minimal', 'card', 'pill')
 AGENTS = ('codex', 'claude')
 ROOT = Path(__file__).resolve().parent
+
+
+def session_key(agent, value):
+    if agent not in AGENTS: raise ValueError('Unknown agent')
+    if not isinstance(value, str): raise ValueError('Invalid session ID')
+    if value.startswith(agent+':'): value = value[len(agent)+1:]
+    if any(value.startswith(other+':') for other in AGENTS if other != agent):
+        raise ValueError('Session belongs to a different agent')
+    if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_.:-]{0,199}', value):
+        raise ValueError('Invalid session ID')
+    return value.lower() if re.fullmatch(r'[0-9a-fA-F-]{36}', value) else value
 
 
 def catalog():
@@ -35,6 +48,19 @@ def load_preferences(path=None, strict=False):
                 if field in profile:
                     if not isinstance(profile[field], str): raise ValueError('Invalid theme choice')
                     cleaned[agent][field] = profile[field]
+        sessions = data.get('sessions', {})
+        if not isinstance(sessions, dict): raise ValueError('Invalid session preferences')
+        cleaned['sessions'] = {}
+        for agent in AGENTS:
+            profiles = sessions.get(agent, {})
+            if not isinstance(profiles, dict): raise ValueError('Invalid session preferences')
+            cleaned['sessions'][agent] = {}
+            for identity, profile in profiles.items():
+                if not isinstance(profile, dict): raise ValueError('Invalid session profile')
+                identity = session_key(agent, identity)
+                if any(not isinstance(profile.get(key, ''), str) for key in ('cast', 'style')):
+                    raise ValueError('Invalid session choice')
+                cleaned['sessions'][agent][identity] = {key: profile[key] for key in ('cast', 'style') if key in profile}
         return cleaned
     except FileNotFoundError:
         return {'version': 1}
@@ -45,30 +71,57 @@ def load_preferences(path=None, strict=False):
         return {'version': 1}
 
 
-def effective_preferences(agent, environment=None, preferences=None):
+def effective_preferences(agent, environment=None, preferences=None, session_id=None, session_aliases=()):
     if agent not in AGENTS: raise ValueError('Unknown agent')
     environment = os.environ if environment is None else environment
     preferences = load_preferences() if preferences is None else preferences
     profile = preferences.get(agent, {})
+    overrides = {}
+    sessions = preferences.get('sessions', {}).get(agent, {})
+    if session_id:
+        for identity in (*session_aliases, session_id):
+            overrides.update(sessions.get(session_key(agent, identity), {}))
     prefix = 'AGENT_THEME_' if agent == 'codex' else 'CLAUDE_STATUSLINE_'
-    return {field: (environment.get(prefix+field.upper()) or profile.get(field) or 'random').lower()
+    return {field: (overrides.get(field) or environment.get(prefix+field.upper()) or profile.get(field) or 'random').lower()
             for field in ('cast', 'style')}
 
 
-def save_selection(agent='all', cast=None, style=None, reset=False, path=None):
+def save_selection(agent='all', cast=None, style=None, reset=False, path=None, session_id=None, session_aliases=()):
     if agent not in (*AGENTS, 'all'): raise ValueError('Unknown agent')
     if cast is not None and cast not in (*catalog(), 'random'): raise ValueError('Unknown character')
     if style is not None and style not in (*STYLES, 'random'): raise ValueError('Unknown layout')
     if not reset and cast is None and style is None: raise ValueError('Choose --cast or --style')
+    if session_id is not None and agent == 'all': raise ValueError('A session must belong to exactly one agent')
+    if session_id is not None: session_id = session_key(agent, session_id)
+    aliases = [session_key(agent, value) for value in session_aliases] if session_id is not None else []
     path = path if path is not None else preferences_path()
-    data = load_preferences(path, strict=True)
-    for target in AGENTS if agent == 'all' else (agent,):
-        if reset:
-            data.pop(target, None)
+    path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+    # Independent terminal commands must not erase each other's session changes.
+    descriptor = os.open(str(path)+'.lock', os.O_CREAT | os.O_RDWR, 0o600)
+    with os.fdopen(descriptor, 'a+') as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        data = load_preferences(path, strict=True)
+        if session_id:
+            profiles = data.setdefault('sessions', {}).setdefault(agent, {})
+            merged = {}
+            for identity in (*aliases, session_id): merged.update(profiles.pop(identity, {}))
+            if not reset: profiles[session_id] = merged
+            profile = profiles.get(session_id, {})
+            if not reset:
+                if cast is not None: profile['cast'] = cast
+                if style is not None: profile['style'] = style
         else:
-            profile = data.setdefault(target, {})
-            if cast is not None: profile['cast'] = cast
-            if style is not None: profile['style'] = style
+            for target in AGENTS if agent == 'all' else (agent,):
+                if reset: data.pop(target, None)
+                else:
+                    profile = data.setdefault(target, {})
+                    if cast is not None: profile['cast'] = cast
+                    if style is not None: profile['style'] = style
+        write_private_json(path, data)
+    return data
+
+
+def write_private_json(path, data):
     path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
     with tempfile.NamedTemporaryFile('w', dir=path.parent, prefix='.preferences-',
                                      encoding='utf-8', delete=False) as stream:
@@ -84,4 +137,3 @@ def save_selection(agent='all', cast=None, style=None, reset=False, path=None):
         path.chmod(0o600)
     finally:
         temporary.unlink(missing_ok=True)
-    return data

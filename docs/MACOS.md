@@ -82,6 +82,7 @@ Codex 使用 Kitty 直接放置动画。Claude 当前使用字符头像回退。
 agent-theme
 agent-theme set --cast luffy --style mecha
 agent-theme set --agent claude --cast gojo --style pill
+agent-theme sessions  # 菜单中也可直接选择某个 Session 单独切换
 ```
 
 也可把这些变量写入自己的 shell 启动文件；它们的优先级高于菜单保存的选择：

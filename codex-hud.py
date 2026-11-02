@@ -9,6 +9,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import uuid
 
 import portable_images
 import native_hud
@@ -20,7 +21,7 @@ def main():
     env['AGENT_THEME_TERMINAL'] = portable_images.terminal_kind()
     env['CODEX_HUD_CLI_ONLY'] = '1'
     env['COLORTERM'] = 'truecolor'
-    socket = env.get('AGENT_THEME_SOCKET', f'agent-theme-{os.getpid()}')
+    socket = env.get('AGENT_THEME_SOCKET') or 'agent-theme-'+uuid.uuid4().hex
     cwd = str(Path.cwd())
     args = sys.argv[1:]
     session_id = next((x for x in args if re.fullmatch(r'[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}',x)), '') if 'resume' in args else ''
@@ -41,6 +42,8 @@ def main():
     state_dir = ''
     try:
         tmux('new-session','-d','-c',cwd,'-s','agent',launch)
+        owner = tmux('display-message', '-p', '-t', 'agent:0.0', '#{pane_pid}').stdout.strip()
+        if owner.isdigit(): panel += ['--owner-pid', owner]
         for key,value in [('status','off'),('mouse','on'),('allow-passthrough','all'),('default-terminal','tmux-256color')]:
             tmux('set-option','-g',key,value)
         # Terminals encode Shift+Enter differently. Forward one stable Alt+Enter

@@ -20,6 +20,8 @@ settings.json
 config.toml
 install.json
 preferences.json
+preferences.json.lock
+session-registry/
 backups/
 verification/
 private/

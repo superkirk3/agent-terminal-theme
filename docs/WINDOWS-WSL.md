@@ -77,6 +77,7 @@ claude --continue
 agent-theme
 agent-theme set --cast luffy --style mecha
 agent-theme set --agent codex --cast ryoma --style card
+agent-theme sessions  # 菜单中也可直接选择某个 Session 单独切换
 ```
 
 偏好保存在 WSL 的用户目录中，与 Mac 分开。显式的角色/布局环境变量仍会覆盖保存值，详见 [配置说明](CONFIGURATION.md)。
