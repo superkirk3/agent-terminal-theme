@@ -66,6 +66,22 @@ Claude 设置采用合并写入；旧设置和 shell 启动文件的备份只保
 
 ## 选择角色和布局
 
+安装后运行 `agent-theme` 打开交互菜单，选择要修改的客户端、角色和布局。Mac 与 WSL 使用相同命令，各自保存本机选择。
+
+```sh
+agent-theme                                         # 交互选择
+agent-theme list                                    # 查看角色、布局
+agent-theme set --cast luffy --style mecha           # 同时切换 Codex 和 Claude
+agent-theme set --agent claude --cast gojo --style pill  # 只切换 Claude
+agent-theme show                                    # 查看当前选择
+agent-theme reset --agent codex                     # 恢复 Codex 的会话随机选择
+agent-theme reset                                  # 恢复两者的会话随机选择
+```
+
+从另一个终端标签或 tmux 面板执行即可。**已运行的状态栏会在下次刷新时读取选择，无需中断任务**；命令只保存显示偏好，不重启客户端。选择保存在本机 `~/.config/agent-theme/preferences.json`，更新和卸载都会保留。
+
+环境变量仍然优先于保存的选择，适合单次覆盖：
+
 ```sh
 # 单次指定
 AGENT_THEME_CAST=luffy AGENT_THEME_STYLE=mecha codex
@@ -82,6 +98,10 @@ AGENT_THEME_WINDOWS_TEXT=1 codex
 
 布局：`mecha`、`minimal`、`card`、`pill`；默认随机选择并尽量在同一会话中保持稳定。素材含多种状态，缺少的状态会使用回退动画。
 
+`--cast random` / `--style random` 表示按会话自动选择。若之前在 shell 中 `export` 了角色或布局，`agent-theme show` 会提示覆盖；去掉相应变量后启动新会话，才能让该会话跟随保存的默认选择。
+
+旧版本没有 `agent-theme` 命令时，先按下节更新并重新运行安装器。升级后需要重新启动一次 Codex HUD，加载新的渲染代码；之后切换主题无需重启。选择 `--shell none` 的用户可以直接执行 `python3 "$HOME/.local/share/agent-theme/theme.py"`，参数相同。
+
 详细变量和指标含义见 [配置说明](docs/CONFIGURATION.md)。
 
 ## 更新与卸载
@@ -96,7 +116,7 @@ python3 install.py --codex --claude
 python3 uninstall.py
 ```
 
-卸载只移除本项目的入口，并在 Claude 的状态栏配置仍属于本项目时恢复其原值；其他新增设置会保留。然后重新打开终端，或执行 `unset -f codex`。素材及本地备份保留，便于自行检查。
+卸载只移除本项目的入口，并在 Claude 的状态栏配置仍属于本项目时恢复其原值；其他新增设置会保留。然后重新打开终端，或执行 `unset -f codex`。素材、主题选择及本地备份保留，便于自行检查。只卸载一个客户端时，另一个客户端仍可使用 `agent-theme`。
 
 ## 检查与排错
 

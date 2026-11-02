@@ -10,7 +10,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 EXCLUDED = {'.git', '__pycache__', '.venv', 'venv'}
-PRIVATE_NAMES = {'auth.json', 'credentials.json', '.credentials.json', 'install.json',
+PRIVATE_NAMES = {'auth.json', 'credentials.json', '.credentials.json', 'install.json', 'preferences.json',
                  'settings.json', 'config.toml', '.env', 'id_rsa', 'id_ed25519'}
 PATTERNS = {
     'private key': rb'-----BEGIN (?:[A-Z ]+ )?PRIVATE KEY-----',

@@ -88,9 +88,6 @@ def main():
         args.log = counters.session_by_id(home, args.session_id)
     # A footer can use the full five lines of every Claude layout.
     os.environ['LINES'] = '30'
-    os.environ['CLAUDE_STATUSLINE_STYLE'] = os.environ.get('AGENT_THEME_STYLE', 'random')
-    if os.environ.get('AGENT_THEME_CAST'):
-        os.environ['CLAUDE_STATUSLINE_CAST'] = os.environ['AGENT_THEME_CAST']
     terminal = graphics.terminal_kind()
     protocol = ('kitty' if terminal in ('ghostty','kitty','rex') else
                 'iterm' if terminal in ('wezterm','iterm.app','iterm2') else

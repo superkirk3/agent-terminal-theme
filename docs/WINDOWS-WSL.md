@@ -71,6 +71,16 @@ claude
 claude --continue
 ```
 
+在另一个 WSL 标签或 tmux 面板中切换主题，两个客户端会在下次刷新时使用新选择：
+
+```sh
+agent-theme
+agent-theme set --cast luffy --style mecha
+agent-theme set --agent codex --cast ryoma --style card
+```
+
+偏好保存在 WSL 的用户目录中，与 Mac 分开。显式的角色/布局环境变量仍会覆盖保存值，详见 [配置说明](CONFIGURATION.md)。
+
 Windows Terminal 的真实图片路径要求终端支持 SIXEL，且 tmux **编译启用了 SIXEL**。在 tmux 中检查：
 
 ```sh

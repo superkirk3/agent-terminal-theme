@@ -5,14 +5,17 @@ import json
 import math
 import os
 from pathlib import Path
+import shlex
 import sys
 import tempfile
+from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 import native_avatar
+import native_hud
 
 spec = importlib.util.spec_from_file_location('native_panel', ROOT/'codex-pane.py')
 panel = importlib.util.module_from_spec(spec)
@@ -20,6 +23,20 @@ spec.loader.exec_module(panel)
 
 
 class NativeTest(unittest.TestCase):
+    def test_native_footer_forwards_preferences_without_stale_tmux_overrides(self):
+        commands = []
+        def tmux(socket, *args, **kwargs):
+            commands.append(args)
+            return SimpleNamespace(stdout='%20\n' if '-v' in args else '%21\n')
+        with tempfile.TemporaryDirectory() as folder, patch.object(native_hud, 'tmux', side_effect=tmux):
+            preferences = str(Path(folder)/'preferences with spaces.json')
+            native_hud.create('/tmp/test-socket', '%1', ['python3', 'codex-pane.py'], folder,
+                              '/tmp/watch-socket', '/tmp', {'AGENT_THEME_PREFERENCES': preferences})
+        command = shlex.split(next(args[-1] for args in commands if args[0] == 'split-window' and '-v' in args))
+        self.assertIn('AGENT_THEME_PREFERENCES='+preferences, command)
+        for key in ('AGENT_THEME_STYLE', 'AGENT_THEME_CAST', 'AGENT_THEME_PREFERENCES'):
+            self.assertIn(('-u', key), list(zip(command, command[1:])))
+
     def test_final_band_stays_inside_pane_after_client_scaling(self):
         # Include the actual source/client mismatch that scrolled Windows.
         for source_height in (16, 19, 20, 32, 34, 48):

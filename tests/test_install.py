@@ -28,6 +28,7 @@ class InstallTest(unittest.TestCase):
         for name in install.RUNTIME: shutil.copy2(ROOT/name, self.fixture/name)
         (self.fixture/'assets').mkdir()
         (self.fixture/'assets/example.txt').write_text('fixture')
+        (self.fixture/'assets/cast/luffy').mkdir(parents=True)
         self.binary = self.base/'toolchain/codex'
         self.binary.parent.mkdir()
         self.binary.write_text('#!/bin/sh\nprintf "codex test\\n"\n')
@@ -104,6 +105,32 @@ class InstallTest(unittest.TestCase):
         self.assertEqual(manifest.stat().st_mode & 0o777, 0o600)
         self.assertEqual(manifest.parent.stat().st_mode & 0o777, 0o700)
         self.assertEqual(Path(data['last_backup']).joinpath('claude-settings.json').stat().st_mode & 0o777, 0o600)
+
+    def test_installed_switcher_survives_update_and_partial_uninstall(self):
+        install.install(self.args(), self.home)
+        switcher = self.home/'.local/share/agent-theme/bin/agent-theme'
+        preferences = self.home/'.config/agent-theme/preferences.json'
+        environment = os.environ.copy()
+        environment['AGENT_THEME_PREFERENCES'] = str(preferences)
+        subprocess.run([sys.executable, str(switcher), 'set', '--cast', 'luffy', '--style', 'pill'],
+                       env=environment, capture_output=True, text=True, check=True)
+        saved = preferences.read_bytes()
+        install.install(self.args(), self.home)
+        self.assertEqual(preferences.read_bytes(), saved)
+        uninstall.uninstall(self.home, codex=True, claude=False)
+        self.assertTrue(switcher.exists())
+        self.assertIn(install.BEGIN, (self.home/'.bashrc').read_text())
+        self.assertIn('statusLine', json.loads((self.home/'.claude/settings.json').read_text()))
+        uninstall.uninstall(self.home, codex=False, claude=True)
+        self.assertFalse(switcher.exists())
+        self.assertNotIn(install.BEGIN, (self.home/'.bashrc').read_text())
+        self.assertEqual(preferences.read_bytes(), saved)
+
+    def test_claude_only_installs_switcher_without_intercepting_codex(self):
+        install.install(self.args(codex=False), self.home)
+        self.assertTrue((self.home/'.local/share/agent-theme/bin/agent-theme').exists())
+        self.assertFalse((self.home/'.local/share/agent-theme/bin/codex').exists())
+        self.assertIn(install.BEGIN, (self.home/'.bashrc').read_text())
 
 
 if __name__ == '__main__': unittest.main()

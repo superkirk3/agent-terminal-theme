@@ -16,11 +16,6 @@ def uninstall(home=None, codex=True, claude=True):
         print('No theme installation manifest found. Nothing changed.')
         return
     if codex and 'codex' in manifest.get('components', []):
-        startup = Path(manifest['shell_file']) if manifest.get('shell_file') else None
-        if startup and startup.exists():
-            content = startup.read_text()
-            content = re.sub(r'(?m)^'+re.escape(BEGIN)+r'\n.*?^'+re.escape(END)+r'\n?', '', content, flags=re.S)
-            startup.write_text(content)
         wrapper = home/'.local/share/agent-theme/bin/codex'
         if wrapper.exists() and b'Agent theme Codex launcher' in wrapper.read_bytes()[:300]:
             wrapper.unlink()
@@ -35,9 +30,18 @@ def uninstall(home=None, codex=True, claude=True):
             private_json(settings, data)
         else: print('Claude statusLine was changed after installation; preserved the newer value.')
         manifest['components'].remove('claude')
+    if not manifest.get('components'):
+        startup = Path(manifest['shell_file']) if manifest.get('shell_file') else None
+        if startup and startup.exists():
+            content = startup.read_text()
+            content = re.sub(r'(?m)^'+re.escape(BEGIN)+r'\n.*?^'+re.escape(END)+r'\n?', '', content, flags=re.S)
+            startup.write_text(content)
+        switcher = home/'.local/share/agent-theme/bin/agent-theme'
+        if switcher.exists() and b'Agent theme switcher' in switcher.read_bytes()[:300]:
+            switcher.unlink()
     private_json(state, manifest)
     print('Theme detached. Open a new shell to discard the current shell function.')
-    print('Runtime assets and private backups are retained for manual review/removal.')
+    print('Runtime assets, theme preferences and private backups are retained for manual review/removal.')
 
 
 def main():

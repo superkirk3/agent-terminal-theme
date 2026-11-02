@@ -4,6 +4,8 @@ case ":$PATH:" in
     *) export PATH="$HOME/.local/share/agent-theme/bin:$PATH" ;;
 esac
 
-codex() {
-    command python3 "$HOME/.local/share/agent-theme/codex-launch.py" "$@"
-}
+if [ -x "$HOME/.local/share/agent-theme/bin/codex" ]; then
+    codex() {
+        command python3 "$HOME/.local/share/agent-theme/codex-launch.py" "$@"
+    }
+fi

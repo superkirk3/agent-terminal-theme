@@ -15,6 +15,8 @@ import time
 import unicodedata
 import zlib
 
+from theme_config import STYLES, effective_preferences
+
 
 RESET = "\x1b[0m"
 BOLD = "\x1b[1m"
@@ -36,7 +38,6 @@ PALETTE = {
     "accent": (255, 132, 32),  # replaced by the cast character's colour
     "accent_dim": (137, 75, 31),
 }
-STYLES = ("mecha", "minimal", "card", "pill")
 QUOTE_PAIRS = (
     ("Believe it!", "说到做到，这就是我的忍道！"),
     ("I'll become Hokage!", "总有一天，我要成为火影！"),
@@ -287,9 +288,9 @@ def load_cast():
     return _CAST[0]
 
 
-def choose_character(cast, session, cwd, now):
+def choose_character(cast, session, cwd, now, pinned=None):
     """Stable character per session, avoiding ones other open sessions show."""
-    pinned = os.environ.get("CLAUDE_STATUSLINE_CAST", "").lower()
+    pinned = os.environ.get("CLAUDE_STATUSLINE_CAST", "").lower() if pinned is None else pinned
     if pinned in cast:
         return pinned
     names = list(cast)
@@ -794,6 +795,7 @@ def terminal_dimensions():
 
 def render(data, now=None, forced=None):
     now = time.time() if now is None else now
+    selection = effective_preferences('codex' if data.get('_agent') == 'codex' else 'claude')
     columns, lines = terminal_dimensions()
     enabled = not os.environ.get("NO_COLOR") and os.environ.get("TERM") != "dumb"
     workspace = data.get("workspace") or {}
@@ -838,9 +840,9 @@ def render(data, now=None, forced=None):
                     "THINKING": "amber"}.get(display, "green")
     marker, marker_tone, quotes, cast_png = MARKER, "orange", QUOTE_PAIRS, None
     person = "漩涡鸣人"
-    cast = {} if os.environ.get("CLAUDE_STATUSLINE_CAST", "").lower() == "legacy" else load_cast()
+    cast = {} if selection['cast'] == 'legacy' else load_cast()
     if cast and not forced:
-        name = choose_character(cast, data.get("session_id") or "", cwd, now)
+        name = choose_character(cast, data.get("session_id") or "", cwd, now, pinned=selection['cast'])
         spec = cast[name]
         wanted = data.get("_cast_state") or cast_state(state, records, age, (q5, q7, pct))
         shown = cast_animation(name, wanted)
@@ -1076,7 +1078,7 @@ def render(data, now=None, forced=None):
                 paint(f"  {ctx[2]}" if ctx[2] else "", "muted"),
                 " ".join(status)]
 
-    style = os.environ.get("CLAUDE_STATUSLINE_STYLE", "random").lower()
+    style = selection['style']
     if style == "random":
         # Like the cast: stable per session, different across sessions.
         style = STYLES[zlib.crc32((data.get("session_id") or cwd or "x").encode()) % len(STYLES)]

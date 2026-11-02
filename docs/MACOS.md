@@ -76,7 +76,15 @@ Codex 使用 Kitty 直接放置动画。Claude 当前使用字符头像回退。
 
 ## 4. 持久配置
 
-可把这些变量写入自己的 shell 启动文件：
+推荐用菜单或命令保存选择，已运行的状态栏会在下次刷新时读取：
+
+```sh
+agent-theme
+agent-theme set --cast luffy --style mecha
+agent-theme set --agent claude --cast gojo --style pill
+```
+
+也可把这些变量写入自己的 shell 启动文件；它们的优先级高于菜单保存的选择：
 
 ```sh
 export AGENT_THEME_STYLE=mecha

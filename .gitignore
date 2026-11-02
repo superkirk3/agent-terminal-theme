@@ -19,6 +19,7 @@ credentials.json
 settings.json
 config.toml
 install.json
+preferences.json
 backups/
 verification/
 private/

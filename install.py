@@ -13,7 +13,7 @@ import tempfile
 SOURCE = Path(__file__).resolve().parent
 RUNTIME = ('statusline.py', 'codex-launch.py', 'codex-hud.py', 'codex-pane.py',
            'codex_hud_status.py', 'portable_images.py', 'sixel_frames.py',
-           'native_avatar.py', 'native_hud.py', 'shell.sh', 'cast.json',
+           'native_avatar.py', 'native_hud.py', 'shell.sh', 'theme.py', 'theme_config.py', 'cast.json',
            'naruto-quotes.json', 'naruto-sprites.json')
 BEGIN = '# >>> agent-terminal-theme >>>'
 END = '# <<< agent-terminal-theme <<<'
@@ -81,13 +81,13 @@ def install(args, home=None):
         real = discover_codex(home, args.codex_bin, manifest.get('real_codex'))
     shell = args.shell
     if shell == 'auto': shell = Path(os.environ.get('SHELL', '/bin/bash')).name
-    if args.codex and shell not in ('bash', 'zsh', 'none'):
+    if shell not in ('bash', 'zsh', 'none'):
         raise RuntimeError('Choose --shell bash, --shell zsh, or --shell none.')
     settings = home/'.claude/settings.json'
     data = json.loads(settings.read_text()) if args.claude and settings.exists() else {}
     if not isinstance(data, dict): raise RuntimeError('Claude settings must contain a JSON object.')
     summary = {'target': str(target), 'codex': args.codex, 'claude': args.claude,
-               'shell': shell if args.codex else 'none', 'real_codex': real}
+               'shell': shell, 'real_codex': real}
     if args.dry_run:
         print(json.dumps(summary, indent=2))
         return summary
@@ -98,24 +98,27 @@ def install(args, home=None):
     for name in RUNTIME: shutil.copy2(SOURCE/name, target/name)
     shutil.copytree(SOURCE/'assets', target/'assets', dirs_exist_ok=True)
     manifest['target'] = str(target)
+    (target/'bin').mkdir(exist_ok=True)
+    switcher = target/'bin/agent-theme'
+    shutil.copy2(SOURCE/'theme.py', switcher)
+    switcher.chmod(0o755)
     if args.codex:
-        (target/'bin').mkdir(exist_ok=True)
         wrapper = target/'bin/codex'
         shutil.copy2(SOURCE/'codex-launch.py', wrapper)
         wrapper.chmod(0o755)
         manifest['real_codex'] = real
         if 'codex' not in manifest['components']: manifest['components'].append('codex')
-        if shell != 'none':
-            startup = Path(args.shell_file).expanduser().absolute() if args.shell_file else home/('.'+shell+'rc')
-            text = startup.read_text() if startup.exists() else ''
-            if BEGIN not in text:
-                backup_file(startup, backup, 'shellrc')
-                startup.parent.mkdir(parents=True, exist_ok=True)
-                text += ('\n'+BEGIN+'\n'
-                         '[ ! -r "$HOME/.local/share/agent-theme/shell.sh" ] || '
-                         '. "$HOME/.local/share/agent-theme/shell.sh"\n'+END+'\n')
-                startup.write_text(text)
-            manifest['shell_file'] = str(startup)
+    if shell != 'none':
+        startup = Path(args.shell_file).expanduser().absolute() if args.shell_file else home/('.'+shell+'rc')
+        text = startup.read_text() if startup.exists() else ''
+        if BEGIN not in text:
+            backup_file(startup, backup, 'shellrc')
+            startup.parent.mkdir(parents=True, exist_ok=True)
+            text += ('\n'+BEGIN+'\n'
+                     '[ ! -r "$HOME/.local/share/agent-theme/shell.sh" ] || '
+                     '. "$HOME/.local/share/agent-theme/shell.sh"\n'+END+'\n')
+            startup.write_text(text)
+        manifest['shell_file'] = str(startup)
     if args.claude:
         if 'claude' not in manifest['components']:
             manifest['claude_had_statusline'] = 'statusLine' in data
@@ -131,7 +134,8 @@ def install(args, home=None):
     print('Theme installed:', target)
     if args.codex:
         print('Original Codex:', real)
-        print('Open a new shell, or run: . "$HOME/.local/share/agent-theme/shell.sh"')
+    print('Open a new shell, or run: . "$HOME/.local/share/agent-theme/shell.sh"')
+    print('Switch characters and layouts with: agent-theme')
     if args.claude: print('Claude: start or resume normally; existing settings were merged.')
     return summary
 

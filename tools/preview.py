@@ -15,8 +15,8 @@ def main():
     parser.add_argument('--cast', default='luffy')
     parser.add_argument('--style', choices=statusline.STYLES, default='mecha')
     args = parser.parse_args()
-    os.environ.update({'CLAUDE_STATUSLINE_CAST': args.cast,
-                       'CLAUDE_STATUSLINE_STYLE': args.style,
+    os.environ.update({'AGENT_THEME_CAST': args.cast,
+                       'AGENT_THEME_STYLE': args.style,
                        'CLAUDE_STATUSLINE_IMAGE': 'off', 'COLUMNS': '140', 'LINES': '30'})
     data = {'session_id': 'synthetic-preview', 'cwd': '~/projects/example',
             'model': {'display_name': 'Example Model'}, 'effort_level': 'high',
