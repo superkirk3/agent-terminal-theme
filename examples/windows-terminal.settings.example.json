@@ -9,9 +9,14 @@
     {
       "id": "AgentTheme.Newline",
       "command": { "action": "sendInput", "input": "\u001b\r" }
+    },
+    {
+      "id": "AgentTheme.PasteClipboard",
+      "command": { "action": "sendInput", "input": "\u0016" }
     }
   ],
   "keybindings": [
-    { "id": "AgentTheme.Newline", "keys": "shift+enter" }
+    { "id": "AgentTheme.Newline", "keys": "shift+enter" },
+    { "id": "AgentTheme.PasteClipboard", "keys": "ctrl+v" }
   ]
 }

@@ -13,6 +13,7 @@ import uuid
 
 import portable_images
 import native_hud
+import windows_paste
 
 
 def main():
@@ -51,6 +52,9 @@ def main():
         tmux('set-option','-g','extended-keys','on')
         tmux('bind-key','-n','S-Enter','send-keys','-H','1b','0d')
         inner_socket = tmux('display-message','-p','#{socket_path}').stdout.strip()
+        if env['AGENT_THEME_TERMINAL'] == 'windowsterminal' and windows_paste.is_wsl():
+            windows_paste.configure(inner_socket)
+            if env.get('TMUX'): windows_paste.configure(env['TMUX'].split(',')[0])
         native = (env['AGENT_THEME_TERMINAL'] == 'windowsterminal'
                   and env.get('AGENT_THEME_WINDOWS_TEXT') != '1')
         footer_socket = env['TMUX'].split(',')[0] if env.get('TMUX') else inner_socket

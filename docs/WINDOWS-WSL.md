@@ -138,6 +138,20 @@ Claude 在 Windows Terminal 中使用彩色字符头像；这与 Codex 的独立
 
 示例键位让 Shift+Enter 发送 `ESC CR`（`1b 0d`）。HUD 自己的 tmux server 也会转发该键位；外层自建 tmux 可合并 [tmux 示例](../examples/tmux.conf)。
 
+### Ctrl+V / Win+V 粘贴文字和图片
+
+Windows Terminal 示例让 Ctrl+V 发送 `0x16`，交给 WSL/tmux 的剪贴板桥接处理。正常使用 Ctrl+V 即可粘贴文字、截图或资源管理器中复制的图片文件；Win+V 继续用于选择剪贴板历史，不要求增加组合键。
+
+Windows Codex HUD 会为自己和外层 tmux 配置此入口。zsh 用户加载 `shell.sh` 后也会为普通 shell 配置 Ctrl+V，并为当前 tmux server 更新绑定。已经运行的旧窗口可在 WSL shell 中加载一次：
+
+```sh
+. "$HOME/.local/share/agent-theme/windows-paste.zsh"
+```
+
+图片和文件会转换为 Codex 支持的本地图片路径，文字以括号粘贴方式传入。桥接不发送额外的 Enter，不替你提交提示词。图片缓存保存在本机 `~/.cache/agent-theme/clipboard/`，目录权限 700、文件 600；剪贴板内容不会写入日志或上传到本项目。
+
+如果要恢复 Windows Terminal 原来的粘贴处理，把 Ctrl+V 的绑定改回 `Terminal.PasteFromClipboard`。普通终端粘贴会接管按键，tmux 桥接便不会收到该键。
+
 如果图片不正常，可先这样启动：
 
 ```sh

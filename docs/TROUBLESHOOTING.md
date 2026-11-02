@@ -59,6 +59,12 @@ tmux list-panes -a -F '#{session_name}:#{window_id} #{pane_id} #{pane_current_co
 CODEX_THEME_DISABLE=1 codex
 ```
 
+## WSL / tmux 的 Ctrl+V 无法粘贴图片
+
+Windows Terminal 的 `Terminal.PasteFromClipboard` 会先处理 Ctrl+V，应用可能收不到图片粘贴按键。请合并 Windows Terminal 示例中的 `AgentTheme.PasteClipboard` 动作，并加载 WSL 剪贴板桥接，见 [Windows 部署说明](WINDOWS-WSL.md#ctrlv--winv-粘贴文字和图片)。
+
+桥接同时支持文字、位图截图以及资源管理器的 FileDrop 图片文件；图片文件路径会转换为 WSL 路径。它不修改系统剪贴板，不把复制文件误当成纯文本，也不需要重启 Codex 会话。
+
 ## 恢复或卸载
 
 运行仓库中的 `python3 uninstall.py`，再重新开 shell。安装前备份在本机 `~/.local/state/agent-theme/backups/`。卸载保留较新的 Claude 自定义状态栏和其他配置字段，不用旧备份覆盖整份现有设置。

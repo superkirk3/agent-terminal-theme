@@ -9,3 +9,7 @@ if [ -x "$HOME/.local/share/agent-theme/bin/codex" ]; then
         command python3 "$HOME/.local/share/agent-theme/codex-launch.py" "$@"
     }
 fi
+
+if [ -n "${ZSH_VERSION:-}" ] && [ -r "$HOME/.local/share/agent-theme/windows-paste.zsh" ]; then
+    . "$HOME/.local/share/agent-theme/windows-paste.zsh"
+fi
