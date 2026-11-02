@@ -1,0 +1,1013 @@
+{
+ "naruto": {
+  "marker": "UZUMAKI·NARUTO",
+  "name": "漩涡鸣人",
+  "accent": [
+   255,
+   140,
+   30
+  ],
+  "quotes": [
+   [
+    "Believe it!",
+    "说到做到，这就是我的忍道！"
+   ],
+   [
+    "I'll become Hokage!",
+    "总有一天，我要成为火影！"
+   ]
+  ],
+  "labels": {
+   "done": "BELIEVE IT!",
+   "tool": "RASENGAN",
+   "power": "KURAMA MODE",
+   "error": "DATTEBAYO?!",
+   "wait": "OI!"
+  },
+  "states": {
+   "done": {
+    "provider": "giphy",
+    "id": "Z6uzIhSiprPnRFBNlr",
+    "url": "https://media.giphy.com/media/Z6uzIhSiprPnRFBNlr/giphy.gif"
+   },
+   "idle": {
+    "provider": "giphy",
+    "id": "9Jb0K4r143JTLDynH6",
+    "url": "https://media.giphy.com/media/9Jb0K4r143JTLDynH6/giphy.gif"
+   },
+   "sleep": {
+    "provider": "giphy",
+    "id": "E7QvrPIJeqyqY",
+    "url": "https://media.giphy.com/media/E7QvrPIJeqyqY/giphy.gif"
+   },
+   "think": {
+    "provider": "giphy",
+    "id": "13dGgUO1rMirGo",
+    "url": "https://media.giphy.com/media/13dGgUO1rMirGo/giphy.gif"
+   },
+   "talk": {
+    "provider": "giphy",
+    "id": "ZCGiYQPSdpcB2ks3pG",
+    "url": "https://media.giphy.com/media/ZCGiYQPSdpcB2ks3pG/giphy.gif"
+   },
+   "tool": {
+    "provider": "giphy",
+    "id": "Ai19LD17xpuDu5omCp",
+    "url": "https://media.giphy.com/media/Ai19LD17xpuDu5omCp/giphy.gif"
+   },
+   "wait": {
+    "provider": "giphy",
+    "id": "STIvquWRArkyI",
+    "url": "https://media.giphy.com/media/STIvquWRArkyI/giphy.gif"
+   },
+   "error": {
+    "provider": "giphy",
+    "id": "3ohzdQIhF6lLf6ppYs",
+    "url": "https://media.giphy.com/media/3ohzdQIhF6lLf6ppYs/giphy.gif"
+   },
+   "power": {
+    "provider": "giphy",
+    "id": "j4kEHQjSYA9VKKcNf6",
+    "url": "https://media.giphy.com/media/j4kEHQjSYA9VKKcNf6/giphy.gif"
+   }
+  }
+ },
+ "goku": {
+  "marker": "SON·GOKU",
+  "name": "孙悟空",
+  "accent": [
+   0,
+   215,
+   255
+  ],
+  "quotes": [
+   [
+    "Kamehameha!",
+    "龟派气功——！"
+   ],
+   [
+    "I'm a Saiyan raised on Earth!",
+    "我是在地球长大的赛亚人！"
+   ]
+  ],
+  "labels": {
+   "done": "YOSH!",
+   "tool": "KAMEHAMEHA",
+   "power": "SUPER SAIYAN",
+   "error": "EH?!",
+   "wait": "HEY!"
+  },
+  "states": {
+   "done": {
+    "provider": "giphy",
+    "id": "NFekgiVenzohC170MF",
+    "url": "https://media.giphy.com/media/NFekgiVenzohC170MF/giphy.gif"
+   },
+   "idle": {
+    "provider": "giphy",
+    "id": "l4FGBag5g5FcTR8bK",
+    "url": "https://media.giphy.com/media/l4FGBag5g5FcTR8bK/giphy.gif"
+   },
+   "sleep": {
+    "provider": "giphy",
+    "id": "3oKIPxbG91Et9HvHXO",
+    "url": "https://media.giphy.com/media/3oKIPxbG91Et9HvHXO/giphy.gif"
+   },
+   "think": {
+    "provider": "giphy",
+    "id": "3o7btLTDQ9ImryBzCE",
+    "url": "https://media.giphy.com/media/3o7btLTDQ9ImryBzCE/giphy.gif"
+   },
+   "talk": {
+    "provider": "giphy",
+    "id": "Rnb5VoZiIyIM0",
+    "url": "https://media.giphy.com/media/Rnb5VoZiIyIM0/giphy.gif"
+   },
+   "tool": {
+    "provider": "giphy",
+    "id": "3ohc0YpD0LR5wRyz1S",
+    "url": "https://media.giphy.com/media/3ohc0YpD0LR5wRyz1S/giphy.gif"
+   },
+   "wait": {
+    "provider": "giphy",
+    "id": "SaSAUwiGPsPtswfPRk",
+    "url": "https://media.giphy.com/media/SaSAUwiGPsPtswfPRk/giphy.gif"
+   },
+   "error": {
+    "provider": "giphy",
+    "id": "zbpwq2PA8t5XO2PmXV",
+    "url": "https://media.giphy.com/media/zbpwq2PA8t5XO2PmXV/giphy.gif"
+   },
+   "power": {
+    "provider": "giphy",
+    "id": "ocMYtK6yU1AE8",
+    "url": "https://media.giphy.com/media/ocMYtK6yU1AE8/giphy.gif"
+   }
+  }
+ },
+ "luffy": {
+  "marker": "MONKEY·D·LUFFY",
+  "name": "路飞",
+  "accent": [
+   235,
+   60,
+   70
+  ],
+  "quotes": [
+   [
+    "I'm gonna be King of the Pirates!",
+    "我是要成为海贼王的男人！"
+   ],
+   [
+    "Meat!!",
+    "肉——！"
+   ]
+  ],
+  "labels": {
+   "done": "SHISHISHI",
+   "tool": "GOMU GOMU",
+   "power": "GEAR 5",
+   "error": "EHHH?!",
+   "wait": "OI!"
+  },
+  "states": {
+   "done": {
+    "provider": "giphy",
+    "id": "KQBS3at18kTfeCUVbi",
+    "url": "https://media.giphy.com/media/KQBS3at18kTfeCUVbi/giphy.gif"
+   },
+   "idle": {
+    "provider": "giphy",
+    "id": "ven4cniMpFiPjDclit",
+    "url": "https://media.giphy.com/media/ven4cniMpFiPjDclit/giphy.gif"
+   },
+   "think": {
+    "provider": "giphy",
+    "id": "pzjsbVzkVenjG",
+    "url": "https://media.giphy.com/media/pzjsbVzkVenjG/giphy.gif"
+   },
+   "talk": {
+    "provider": "giphy",
+    "id": "gT1rnhv6sO16C4RFus",
+    "url": "https://media.giphy.com/media/gT1rnhv6sO16C4RFus/giphy.gif"
+   },
+   "tool": {
+    "provider": "giphy",
+    "id": "axbcxcNThrlte",
+    "url": "https://media.giphy.com/media/axbcxcNThrlte/giphy.gif"
+   },
+   "wait": {
+    "provider": "giphy",
+    "id": "crgCt9SePcASSuhY39",
+    "url": "https://media.giphy.com/media/crgCt9SePcASSuhY39/giphy.gif"
+   },
+   "error": {
+    "provider": "giphy",
+    "id": "n881nu8KO2tJ5VtJ7U",
+    "url": "https://media.giphy.com/media/n881nu8KO2tJ5VtJ7U/giphy.gif"
+   },
+   "power": {
+    "provider": "giphy",
+    "id": "Tgvn82bqJT36lkVqDZ",
+    "url": "https://media.giphy.com/media/Tgvn82bqJT36lkVqDZ/giphy.gif"
+   }
+  }
+ },
+ "gojo": {
+  "marker": "GOJO·SATORU",
+  "name": "五条悟",
+  "accent": [
+   170,
+   130,
+   255
+  ],
+  "quotes": [
+   [
+    "I alone am the honored one.",
+    "天上天下，唯我独尊。"
+   ],
+   [
+    "Don't worry, I'm the strongest.",
+    "放心吧，我是最强的。"
+   ]
+  ],
+  "labels": {
+   "done": "EASY",
+   "tool": "DOMAIN",
+   "power": "HOLLOW PURPLE",
+   "error": "HUH?",
+   "wait": "YO~"
+  },
+  "states": {
+   "done": {
+    "provider": "giphy",
+    "id": "k735iGy8AvA0WYbuZa",
+    "url": "https://media.giphy.com/media/k735iGy8AvA0WYbuZa/giphy.gif"
+   },
+   "idle": {
+    "provider": "giphy",
+    "id": "NFPuYx71JkroPMTvR3",
+    "url": "https://media.giphy.com/media/NFPuYx71JkroPMTvR3/giphy.gif"
+   },
+   "sleep": {
+    "provider": "giphy",
+    "id": "VESEbRRGALYWOemYmE",
+    "url": "https://media.giphy.com/media/VESEbRRGALYWOemYmE/giphy.gif"
+   },
+   "think": {
+    "provider": "giphy",
+    "id": "Hzdph9ISDR3e5q0UBy",
+    "url": "https://media.giphy.com/media/Hzdph9ISDR3e5q0UBy/giphy.gif"
+   },
+   "talk": {
+    "provider": "giphy",
+    "id": "flxcn9dUkCp0NZWbxo",
+    "url": "https://media.giphy.com/media/flxcn9dUkCp0NZWbxo/giphy.gif"
+   },
+   "tool": {
+    "provider": "giphy",
+    "id": "cByts7baForf4uj0eU",
+    "url": "https://media.giphy.com/media/cByts7baForf4uj0eU/giphy.gif"
+   },
+   "wait": {
+    "provider": "giphy",
+    "id": "kSxi9DiWH4Q8q1Kbql",
+    "url": "https://media.giphy.com/media/kSxi9DiWH4Q8q1Kbql/giphy.gif"
+   },
+   "error": {
+    "provider": "giphy",
+    "id": "CXD7wvNq621zfxF0Mi",
+    "url": "https://media.giphy.com/media/CXD7wvNq621zfxF0Mi/giphy.gif"
+   },
+   "power": {
+    "provider": "giphy",
+    "id": "8fBuzTdpZyB4NDIXoZ",
+    "url": "https://media.giphy.com/media/8fBuzTdpZyB4NDIXoZ/giphy.gif"
+   }
+  }
+ },
+ "doraemon": {
+  "marker": "DORAEMON",
+  "name": "哆啦A梦",
+  "accent": [
+   30,
+   150,
+   240
+  ],
+  "quotes": [
+   [
+    "Bamboo-copter!",
+    "竹蜻蜓！"
+   ],
+   [
+    "Anywhere Door!",
+    "任意门！"
+   ]
+  ],
+  "labels": {
+   "done": "AHEM~",
+   "tool": "GADGET",
+   "power": "PANIC",
+   "error": "GASP!",
+   "wait": "ATTENTION!"
+  },
+  "states": {
+   "done": {
+    "provider": "giphy",
+    "id": "tqtMmBqrGs6hv24dLz",
+    "url": "https://media.giphy.com/media/tqtMmBqrGs6hv24dLz/giphy.gif"
+   },
+   "idle": {
+    "provider": "giphy",
+    "id": "zaSt7BH8D182XHeWHE",
+    "url": "https://media.giphy.com/media/zaSt7BH8D182XHeWHE/giphy.gif"
+   },
+   "sleep": {
+    "provider": "giphy",
+    "id": "kMLq8NIemWgD6glGZF",
+    "url": "https://media.giphy.com/media/kMLq8NIemWgD6glGZF/giphy.gif"
+   },
+   "think": {
+    "provider": "giphy",
+    "id": "TwHHdbGssYQtadIB9y",
+    "url": "https://media.giphy.com/media/TwHHdbGssYQtadIB9y/giphy.gif"
+   },
+   "talk": {
+    "provider": "giphy",
+    "id": "Dp3c9BedSVYnS1kIEn",
+    "url": "https://media.giphy.com/media/Dp3c9BedSVYnS1kIEn/giphy.gif"
+   },
+   "tool": {
+    "provider": "giphy",
+    "id": "TkDVr6D3OgqEqcLIYP",
+    "url": "https://media.giphy.com/media/TkDVr6D3OgqEqcLIYP/giphy.gif"
+   },
+   "wait": {
+    "provider": "giphy",
+    "id": "nUxGT7uQSAln7jXA7q",
+    "url": "https://media.giphy.com/media/nUxGT7uQSAln7jXA7q/giphy.gif"
+   },
+   "error": {
+    "provider": "giphy",
+    "id": "NUwsF5Oi5FUTWTeKzr",
+    "url": "https://media.giphy.com/media/NUwsF5Oi5FUTWTeKzr/giphy.gif"
+   },
+   "power": {
+    "provider": "giphy",
+    "id": "XX7Ur9c7MSVwD3BcVD",
+    "url": "https://media.giphy.com/media/XX7Ur9c7MSVwD3BcVD/giphy.gif"
+   }
+  }
+ },
+ "saitama": {
+  "marker": "SAITAMA",
+  "name": "埼玉",
+  "accent": [
+   255,
+   220,
+   60
+  ],
+  "quotes": [
+   [
+    "OK.",
+    "OK。"
+   ],
+   [
+    "Serious series: Serious punch.",
+    "认真系列·认真一拳。"
+   ]
+  ],
+  "labels": {
+   "done": "OK.",
+   "tool": "NORMAL PUNCH",
+   "power": "SERIOUS MODE",
+   "error": "OH MY GOD",
+   "wait": "HEY"
+  },
+  "states": {
+   "done": {
+    "provider": "giphy",
+    "id": "KVavw5OVSK7LmYyhVx",
+    "url": "https://media.giphy.com/media/KVavw5OVSK7LmYyhVx/giphy.gif"
+   },
+   "idle": {
+    "provider": "tenor",
+    "id": "13645746324704434541",
+    "url": "https://media.tenor.com/vV9t--sZmW0AAAAi/one-punch.gif"
+   },
+   "think": {
+    "provider": "tenor",
+    "id": "5382806085131754718",
+    "url": "https://media.tenor.com/SrORnXcW3N4AAAAi/saitama-1.gif"
+   },
+   "talk": {
+    "provider": "tenor",
+    "id": "17201784965242241862",
+    "url": "https://media.tenor.com/7rkESXPrQ0YAAAAi/saitama.gif"
+   },
+   "tool": {
+    "provider": "giphy",
+    "id": "4VeptvPL5xMQZBJmGe",
+    "url": "https://media.giphy.com/media/4VeptvPL5xMQZBJmGe/giphy.gif"
+   },
+   "wait": {
+    "provider": "giphy",
+    "id": "Y3rwoQDYUOQBKF51Kw",
+    "url": "https://media.giphy.com/media/Y3rwoQDYUOQBKF51Kw/giphy.gif"
+   },
+   "error": {
+    "provider": "giphy",
+    "id": "BMViDgJUpkAg94N7S7",
+    "url": "https://media.giphy.com/media/BMViDgJUpkAg94N7S7/giphy.gif"
+   },
+   "power": {
+    "provider": "tenor",
+    "id": "9354679864327367997",
+    "url": "https://media.tenor.com/gdJ_xfy7bT0AAAAi/saitama-saitama-ok-meme.gif"
+   }
+  }
+ },
+ "mob": {
+  "marker": "KAGEYAMA·SHIGEO",
+  "name": "影山茂夫",
+  "accent": [
+   100,
+   235,
+   160
+  ],
+  "quotes": [
+   [
+    "I'm not special.",
+    "我只是个普通人。"
+   ],
+   [
+    "100%",
+    "情绪值 100%"
+   ]
+  ],
+  "labels": {
+   "done": "THANK YOU",
+   "tool": "PSYCHIC",
+   "power": "???%",
+   "error": "...",
+   "wait": "SHISHOU!"
+  },
+  "states": {
+   "done": {
+    "provider": "giphy",
+    "id": "6WCZjh40KF5plpROov",
+    "url": "https://media.giphy.com/media/6WCZjh40KF5plpROov/giphy.gif"
+   },
+   "idle": {
+    "provider": "giphy",
+    "id": "5wO4YBKL7ZI7TztKH2",
+    "url": "https://media.giphy.com/media/5wO4YBKL7ZI7TztKH2/giphy.gif"
+   },
+   "think": {
+    "provider": "giphy",
+    "id": "Yl5VGKskuiKrv6R2pN",
+    "url": "https://media.giphy.com/media/Yl5VGKskuiKrv6R2pN/giphy.gif"
+   },
+   "talk": {
+    "provider": "giphy",
+    "id": "Bvj2XUSEmuEam5zEza",
+    "url": "https://media.giphy.com/media/Bvj2XUSEmuEam5zEza/giphy.gif"
+   },
+   "tool": {
+    "provider": "giphy",
+    "id": "8rvKaJXk7CZWvQcqJu",
+    "url": "https://media.giphy.com/media/8rvKaJXk7CZWvQcqJu/giphy.gif"
+   },
+   "wait": {
+    "provider": "giphy",
+    "id": "weo3M5pyjYqwTmK9cq",
+    "url": "https://media.giphy.com/media/weo3M5pyjYqwTmK9cq/giphy.gif"
+   },
+   "error": {
+    "provider": "giphy",
+    "id": "rBodBIYwtWVOBUXQBp",
+    "url": "https://media.giphy.com/media/rBodBIYwtWVOBUXQBp/giphy.gif"
+   },
+   "power": {
+    "provider": "giphy",
+    "id": "ZRtME5Wuk8Togu6jui",
+    "url": "https://media.giphy.com/media/ZRtME5Wuk8Togu6jui/giphy.gif"
+   }
+  }
+ },
+ "levi": {
+  "marker": "LEVI·ACKERMAN",
+  "name": "利威尔",
+  "accent": [
+   70,
+   150,
+   100
+  ],
+  "quotes": [
+   [
+    "Tch.",
+    "啧。"
+   ],
+   [
+    "Give up on your dreams and die.",
+    "放弃梦想，然后去死吧。"
+   ]
+  ],
+  "labels": {
+   "done": "TCH.",
+   "tool": "CLEANING",
+   "power": "TITAN ALERT",
+   "error": "OI",
+   "wait": "OI, BRAT"
+  },
+  "states": {
+   "done": {
+    "provider": "giphy",
+    "id": "hqUFL2f9FfwXUqJ99q",
+    "url": "https://media.giphy.com/media/hqUFL2f9FfwXUqJ99q/giphy.gif"
+   },
+   "idle": {
+    "provider": "giphy",
+    "id": "0UkR648p13s7erzmsp",
+    "url": "https://media.giphy.com/media/0UkR648p13s7erzmsp/giphy.gif"
+   },
+   "think": {
+    "provider": "giphy",
+    "id": "lSyI7K944RdFEA5lCo",
+    "url": "https://media.giphy.com/media/lSyI7K944RdFEA5lCo/giphy.gif"
+   },
+   "talk": {
+    "provider": "giphy",
+    "id": "B7nQGprEx2dYx14vXa",
+    "url": "https://media.giphy.com/media/B7nQGprEx2dYx14vXa/giphy.gif"
+   },
+   "tool": {
+    "provider": "giphy",
+    "id": "a8X5vRALCnUsg",
+    "url": "https://media.giphy.com/media/a8X5vRALCnUsg/giphy.gif"
+   },
+   "wait": {
+    "provider": "giphy",
+    "id": "svRpcN2bFTglO",
+    "url": "https://media.giphy.com/media/svRpcN2bFTglO/giphy.gif"
+   },
+   "error": {
+    "provider": "giphy",
+    "id": "oHWnStBAnM1RHlF1CR",
+    "url": "https://media.giphy.com/media/oHWnStBAnM1RHlF1CR/giphy.gif"
+   },
+   "power": {
+    "provider": "giphy",
+    "id": "X8rHqGrQodILGxXN7c",
+    "url": "https://media.giphy.com/media/X8rHqGrQodILGxXN7c/giphy.gif"
+   }
+  }
+ },
+ "natsu": {
+  "marker": "NATSU·DRAGNEEL",
+  "name": "纳兹",
+  "accent": [
+   255,
+   90,
+   170
+  ],
+  "quotes": [
+   [
+    "I'm all fired up!",
+    "我燃起来了！"
+   ],
+   [
+    "Aye sir!",
+    "Aye sir!"
+   ]
+  ],
+  "labels": {
+   "done": "AYE SIR!",
+   "tool": "FIRE DRAGON",
+   "power": "DRAGON FORCE",
+   "error": "NO WAY",
+   "wait": "OI!"
+  },
+  "states": {
+   "done": {
+    "provider": "giphy",
+    "id": "rOSP7OuiqpAo7Zi2UF",
+    "url": "https://media.giphy.com/media/rOSP7OuiqpAo7Zi2UF/giphy.gif"
+   },
+   "idle": {
+    "provider": "giphy",
+    "id": "d0Mo74oeViMRG",
+    "url": "https://media.giphy.com/media/d0Mo74oeViMRG/giphy.gif"
+   },
+   "think": {
+    "provider": "tenor",
+    "id": "17854484028060740457",
+    "url": "https://media.tenor.com/98feoFxyK2kAAAAi/happy-fairytail.gif"
+   },
+   "talk": {
+    "provider": "tenor",
+    "id": "10521225938939323571",
+    "url": "https://media.tenor.com/kgLnP2QapLMAAAAi/yu-natsu-dragneel.gif"
+   },
+   "tool": {
+    "provider": "giphy",
+    "id": "KcBpqcVt8QbgL6n8FL",
+    "url": "https://media.giphy.com/media/KcBpqcVt8QbgL6n8FL/giphy.gif"
+   },
+   "wait": {
+    "provider": "giphy",
+    "id": "rOSP7OuiqpAo7Zi2UF",
+    "url": "https://media.giphy.com/media/rOSP7OuiqpAo7Zi2UF/giphy.gif"
+   },
+   "error": {
+    "provider": "giphy",
+    "id": "3o7bujmBx7EYMRBhU4",
+    "url": "https://media.giphy.com/media/3o7bujmBx7EYMRBhU4/giphy.gif"
+   },
+   "power": {
+    "provider": "giphy",
+    "id": "KcBpqcVt8QbgL6n8FL",
+    "url": "https://media.giphy.com/media/KcBpqcVt8QbgL6n8FL/giphy.gif"
+   }
+  }
+ },
+ "ryoma": {
+  "marker": "ECHIZEN·RYOMA",
+  "name": "越前龙马",
+  "accent": [
+   190,
+   240,
+   70
+  ],
+  "mask": "circle",
+  "quotes": [
+   [
+    "Mada mada dane.",
+    "まだまだだね。"
+   ],
+   [
+    "You still have lots more to work on.",
+    "你还差得远呢。"
+   ]
+  ],
+  "labels": {
+   "done": "MADA MADA DANE",
+   "tool": "TWIST SERVE",
+   "power": "PINNACLE",
+   "error": "...!?",
+   "wait": "OI"
+  },
+  "states": {
+   "done": {
+    "provider": "tenor",
+    "id": "5221677840086351681",
+    "url": "https://media1.tenor.com/m/SHcgVHXgP0EAAAAd/prince-of-tennis-mada-mada-dane.gif"
+   },
+   "idle": {
+    "provider": "tenor",
+    "id": "5084151292386247990",
+    "url": "https://media1.tenor.com/m/Ro6IqdcGhTYAAAAd/ryoma-echizen-princeof-tennis.gif",
+    "focus": [
+     0.5,
+     0.42
+    ]
+   },
+   "sleep": {
+    "provider": "tenor",
+    "id": "14516524072296761085",
+    "url": "https://media1.tenor.com/m/yXUNu16nxv0AAAAd/prince-of-tennis-tired.gif"
+   },
+   "think": {
+    "provider": "tenor",
+    "id": "18151827331855292062",
+    "url": "https://media1.tenor.com/m/--g-ySt2Fp4AAAAC/ryoma-echizen-princeof-tennis.gif",
+    "focus": [
+     0.5,
+     0.42
+    ]
+   },
+   "talk": {
+    "provider": "tenor",
+    "id": "17818938467295759277",
+    "url": "https://media1.tenor.com/m/90mWIJG1C60AAAAC/echizen-ryoma-rapper-ryoma.gif"
+   },
+   "tool": {
+    "provider": "tenor",
+    "id": "16801275231586352954",
+    "url": "https://media1.tenor.com/m/6SoezmBF_zoAAAAC/prince-of-tennis-ryoma-echizen.gif"
+   },
+   "wait": {
+    "provider": "tenor",
+    "id": "17563751611235839040",
+    "url": "https://media1.tenor.com/m/8777CJ7oLEAAAAAC/ryoma-echizen-princeof-tennis.gif"
+   },
+   "error": {
+    "provider": "tenor",
+    "id": "1706950991248739041",
+    "url": "https://media1.tenor.com/m/F7BO4fphyuEAAAAd/prince-of-tennis-echizen-ryoma.gif",
+    "range": [
+     30,
+     36
+    ]
+   },
+   "power": {
+    "provider": "tenor",
+    "id": "1044108286542985383",
+    "url": "https://media1.tenor.com/m/Dn1q9GZvuKcAAAAd/prince-of-tennis-echizen-ryoma.gif"
+   }
+  }
+ },
+ "bleach": {
+  "marker": "BLEACH",
+  "name": "死神",
+  "accent": [
+   215,
+   220,
+   235
+  ],
+  "mask": "circle",
+  "members": {
+   "urahara": {
+    "marker": "URAHARA·KISUKE",
+    "name": "浦原喜助",
+    "quotes": [
+     [
+      "Wake up, Benihime.",
+      "起来吧，红姬。"
+     ],
+     [
+      "Fufufu~",
+      "呵呵呵~"
+     ]
+    ]
+   },
+   "orihime": {
+    "marker": "INOUE·ORIHIME",
+    "name": "井上织姬",
+    "quotes": [
+     [
+      "I reject!",
+      "我拒绝！"
+     ],
+     [
+      "Red bean paste and butter!",
+      "红豆馅配黄油！"
+     ]
+    ]
+   },
+   "gin": {
+    "marker": "ICHIMARU·GIN",
+    "name": "市丸银",
+    "quotes": [
+     [
+      "Shoot to kill, Shinso.",
+      "射杀他，神枪。"
+     ],
+     [
+      "Bye bye~",
+      "拜拜~"
+     ]
+    ]
+   },
+   "ichigo": {
+    "marker": "KUROSAKI·ICHIGO",
+    "name": "黑崎一护",
+    "quotes": [
+     [
+      "Bankai!",
+      "卍解！"
+     ],
+     [
+      "Getsuga Tensho!",
+      "月牙天冲！"
+     ]
+    ]
+   }
+  },
+  "quotes": [
+   [
+    "Wake up, Benihime.",
+    "起来吧，红姬。"
+   ],
+   [
+    "Shoot to kill, Shinso.",
+    "射杀他，神枪。"
+   ],
+   [
+    "I reject!",
+    "我拒绝！"
+   ],
+   [
+    "Bankai!",
+    "卍解！"
+   ]
+  ],
+  "labels": {
+   "done": "FUFUFU~",
+   "tool": "SHOOT TO KILL",
+   "power": "HOLLOW",
+   "error": "EHHH!?",
+   "wait": "HELLO CHAT",
+   "idle": "NOM NOM",
+   "sleep": "NYAA"
+  },
+  "states": {
+   "done": {
+    "provider": "tenor",
+    "id": "16851013632887006493",
+    "url": "https://media1.tenor.com/m/6drTnl1-pR0AAAAd/urahara-kisuke-urahara.gif",
+    "who": "urahara"
+   },
+   "idle": {
+    "provider": "tenor",
+    "id": "9979561831982529781",
+    "url": "https://media1.tenor.com/m/in6GnLldfPUAAAAC/orihime-bleach-anime-nomnom.gif",
+    "who": "orihime"
+   },
+   "sleep": {
+    "provider": "tenor",
+    "id": "1132054726367327531",
+    "url": "https://media1.tenor.com/m/D7XdxpdtNSsAAAAC/kisuke.gif",
+    "who": "urahara"
+   },
+   "think": {
+    "provider": "tenor",
+    "id": "14610336138716069063",
+    "url": "https://media1.tenor.com/m/ysJXTy05PMcAAAAC/ichimaru-gin.gif",
+    "who": "gin"
+   },
+   "talk": {
+    "provider": "tenor",
+    "id": "14201923238061186632",
+    "url": "https://media1.tenor.com/m/xRdd8KQAnkgAAAAd/orihime-inoue-orihimeinoue.gif",
+    "who": "orihime",
+    "zoom": 1.3,
+    "focus": [
+     0.5,
+     0.6
+    ]
+   },
+   "tool": {
+    "provider": "tenor",
+    "id": "6743233188112947548",
+    "url": "https://media1.tenor.com/m/XZTG238Y2VwAAAAC/gin-ichimaru-shinso-ichigo.gif",
+    "who": "gin"
+   },
+   "wait": {
+    "provider": "tenor",
+    "id": "606300619789851386",
+    "url": "https://media1.tenor.com/m/CGoDM42sWvoAAAAd/kisuke-hello-chat.gif",
+    "who": "urahara"
+   },
+   "error": {
+    "provider": "tenor",
+    "id": "4010485155556224610",
+    "url": "https://media1.tenor.com/m/N6gbACHn7mIAAAAd/orihime.gif",
+    "who": "orihime"
+   },
+   "power": {
+    "provider": "giphy",
+    "id": "PhrRkLx4bHxGsEQ7JV",
+    "url": "https://media.giphy.com/media/PhrRkLx4bHxGsEQ7JV/giphy.gif",
+    "who": "ichigo"
+   }
+  }
+ },
+ "kimetsu": {
+  "marker": "KIMETSU",
+  "name": "鬼灭之刃",
+  "accent": [
+   255,
+   90,
+   40
+  ],
+  "members": {
+   "rengoku": {
+    "marker": "RENGOKU·KYOJURO",
+    "name": "炼狱杏寿郎",
+    "quotes": [
+     [
+      "Umai!",
+      "好吃！"
+     ],
+     [
+      "Set your heart ablaze!",
+      "燃烧你的心！"
+     ]
+    ]
+   },
+   "inosuke": {
+    "marker": "HASHIBIRA·INOSUKE",
+    "name": "嘴平伊之助",
+    "quotes": [
+     [
+      "Pig rush!",
+      "猪突猛进！"
+     ],
+     [
+      "I'm the king of the mountain!",
+      "本大爷是山大王！"
+     ]
+    ]
+   },
+   "tanjiro": {
+    "marker": "KAMADO·TANJIRO",
+    "name": "灶门炭治郎",
+    "quotes": [
+     [
+      "Total concentration!",
+      "全集中！"
+     ],
+     [
+      "I won't give up!",
+      "我绝不放弃！"
+     ]
+    ]
+   }
+  },
+  "quotes": [
+   [
+    "Umai!",
+    "好吃！"
+   ],
+   [
+    "Set your heart ablaze!",
+    "燃烧你的心！"
+   ],
+   [
+    "Pig rush!",
+    "猪突猛进！"
+   ],
+   [
+    "Total concentration!",
+    "全集中！"
+   ]
+  ],
+  "labels": {
+   "done": "UMAI!",
+   "idle": "UMAI!",
+   "tool": "BEAST BREATHING",
+   "power": "FLAME HASHIRA",
+   "error": "I IS ENGRY",
+   "wait": "PIG RUSH!",
+   "think": "TOTAL CONCENTRATION",
+   "sleep": "OINK"
+  },
+  "states": {
+   "done": {
+    "provider": "tenor",
+    "id": "4320274010163545099",
+    "url": "https://media.tenor.com/O_SyUowmhAsAAAAi/rengoku-tojuro-toujurou.gif",
+    "who": "rengoku"
+   },
+   "idle": {
+    "provider": "giphy",
+    "id": "g1BFZXdninnX9ZIaom",
+    "url": "https://media.giphy.com/media/g1BFZXdninnX9ZIaom/giphy.gif",
+    "who": "rengoku"
+   },
+   "sleep": {
+    "provider": "giphy",
+    "id": "eR1SvO9v7CgOxEgBO0",
+    "url": "https://media.giphy.com/media/eR1SvO9v7CgOxEgBO0/giphy.gif",
+    "who": "inosuke"
+   },
+   "think": {
+    "provider": "tenor",
+    "id": "18430906627144189495",
+    "url": "https://media.tenor.com/_8e77R9ShjcAAAAi/demon-slayer-tanjiro.gif",
+    "who": "tanjiro"
+   },
+   "talk": {
+    "provider": "giphy",
+    "id": "yRpsRnvq9JEVcFn6Yo",
+    "url": "https://media.giphy.com/media/yRpsRnvq9JEVcFn6Yo/giphy.gif",
+    "who": "rengoku"
+   },
+   "tool": {
+    "provider": "tenor",
+    "id": "4364198768016400075",
+    "url": "https://media.tenor.com/PJC_qDDQnssAAAAi/inosuke-protesta.gif",
+    "who": "inosuke"
+   },
+   "wait": {
+    "provider": "giphy",
+    "id": "dup6jDyj6Yk6z5M8nN",
+    "url": "https://media.giphy.com/media/dup6jDyj6Yk6z5M8nN/giphy.gif",
+    "who": "inosuke"
+   },
+   "error": {
+    "provider": "giphy",
+    "id": "o5hociRbIhj6SRhD9J",
+    "url": "https://media.giphy.com/media/o5hociRbIhj6SRhD9J/giphy.gif",
+    "who": "inosuke"
+   },
+   "power": {
+    "provider": "tenor",
+    "id": "518502135354267808",
+    "url": "https://media.tenor.com/BzIW8ekSmKAAAAAi/rengoku.gif",
+    "who": "rengoku"
+   }
+  }
+ }
+}

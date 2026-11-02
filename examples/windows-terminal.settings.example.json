@@ -1,0 +1,17 @@
+{
+  "profiles": {
+    "defaults": {
+      "font": { "face": "Maple Mono NF CN", "size": 13 },
+      "background": "#282C34"
+    }
+  },
+  "actions": [
+    {
+      "id": "AgentTheme.Newline",
+      "command": { "action": "sendInput", "input": "\u001b\r" }
+    }
+  ],
+  "keybindings": [
+    { "id": "AgentTheme.Newline", "keys": "shift+enter" }
+  ]
+}
