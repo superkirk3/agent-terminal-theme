@@ -794,15 +794,43 @@ def terminal_dimensions():
     return dimension("COLUMNS", terminal.columns), dimension("LINES", terminal.lines)
 
 
+def visual_state(name, spec, wanted, identity, now, selection):
+    """Cycle artwork only; labels and telemetry continue to describe real work."""
+    if selection.get('rotation') != 'cycle' or wanted in ('error', 'wait'):
+        return cast_animation(name, wanted)
+    try: interval = max(10, min(3600, int(selection.get('interval', 30))))
+    except (ValueError, TypeError): interval = 30
+    states = [key for key in spec.get('states', {}) if (CAST_DIR/name/key).is_dir()]
+    if not states: return cast_animation(name, wanted)
+    groups = {}
+    for key in states:
+        who = spec['states'][key].get('who') or name
+        groups.setdefault(who, []).append(key)
+    tick = int(now//interval) + zlib.crc32(identity.encode())
+    choices = list(groups.values())[tick % len(groups)]
+    return choices[(tick//len(groups)) % len(choices)]
+
+
+def fast_mode(data):
+    """Only explicit client telemetry can establish the configured speed mode."""
+    if isinstance(data.get('fast_mode'), bool): return 'ON' if data['fast_mode'] else 'OFF'
+    if 'service_tier' in data:
+        tier = str(data['service_tier'] or '').lower()
+        if tier in ('priority', 'fast'): return 'ON'
+        if tier == 'ultrafast': return 'ULTRA'
+        if tier in ('', 'default', 'standard', 'auto'): return 'OFF'
+    return '?'
+
+
 def render(data, now=None, forced=None):
     now = time.time() if now is None else now
-    agent = 'codex' if data.get('_agent') == 'codex' else 'claude'
+    agent = data.get('_agent') if data.get('_agent') in ('codex', 'copilot') else 'claude'
     try:
         identity = session_key(agent, data.get('session_id', ''))
         aliases = [session_key(agent, value) for value in data.get('_theme_session_aliases', [])]
     except (ValueError, TypeError):
         identity, aliases = '', []
-    selection = effective_preferences(agent, session_id=identity, session_aliases=aliases)
+    selection = effective_preferences(agent, session_id=identity, session_aliases=aliases, include_visuals=True)
     columns, lines = terminal_dimensions()
     enabled = not os.environ.get("NO_COLOR") and os.environ.get("TERM") != "dumb"
     workspace = data.get("workspace") or {}
@@ -831,6 +859,11 @@ def render(data, now=None, forced=None):
     state = forced or data.get("_activity_state") or activity(records, age)
     animated = state != "IDLE"
     speed = data.get("_tokens_per_second") if "_tokens_per_second" in data else tokens_per_second(records)
+    speed_label = data.get('_speed_label') or 'EST'
+    api_ms = number((data.get('cost') or {}).get('total_api_duration_ms'))
+    output_total = number(context.get('total_output_tokens'))
+    if agent == 'claude' and api_ms and output_total is not None:
+        speed, speed_label = output_total/(api_ms/1000), 'API'
     rate = data.get("rate_limits") or {}
     home = str(Path.home())
     path = "~" + cwd[len(home):] if cwd == home or cwd.startswith(home + os.sep) else cwd
@@ -855,7 +888,7 @@ def render(data, now=None, forced=None):
         name = choose_character(cast, data.get("session_id") or "", cwd, now, pinned=selection['cast'])
         spec = cast[name]
         wanted = data.get("_cast_state") or cast_state(state, records, age, (q5, q7, pct))
-        shown = cast_animation(name, wanted)
+        shown = visual_state(name, spec, wanted, identity or cwd, now, selection)
         if shown:
             PALETTE["accent"] = tuple(spec.get("accent") or PALETTE["orange"])
             # Accent mixed into the ink background, for card borders.
@@ -902,6 +935,9 @@ def render(data, now=None, forced=None):
 
     def paint(text, tone, bold=False):
         return rgb(text, PALETTE[tone], enabled, bold=bold)
+
+    fast = fast_mode(data)
+    fast_badge = paint('[FAST '+fast+']', 'green' if fast in ('ON', 'ULTRA') else 'muted', True)
 
     def readout(value, note, ahead, good_high=False):
         if value is None:
@@ -955,9 +991,9 @@ def render(data, now=None, forced=None):
             metrics[1:] = [
                 ("CACHE", gauge(hit, enabled, cells, tone="green") + " " +
                  readout(hit, cache_note, False, good_high=True)),
-                ("COST", cost_value),
+                ("TOKENS", paint(token_count(data.get('_total_tokens')), 'text')) if agent == 'copilot' else ("COST", cost_value),
             ]
-        metrics.append(("LAST" if data.get("_agent") == "codex" else "OUT", speed_value))
+        metrics.append((speed_label, speed_value))
         rows = [""]
         for i, ((label, value, tone), (right_label, metric)) in enumerate(zip(left, metrics)):
             spine = "┗━" if i == len(left) - 1 else "┣╸"
@@ -971,7 +1007,7 @@ def render(data, now=None, forced=None):
         scan = "".join(paint("▪", state_tone if i == SCAN[int(now) % len(SCAN)] else "dark")
                        for i in range(5)) + " " if animated else ""
         status = scan + paint(f"{dot} {state}", state_tone, True)
-        title = chip(marker, marker_tone, enabled) + " " + chip(display, display_tone, enabled)
+        title = chip(marker, marker_tone, enabled) + " " + chip(display, display_tone, enabled) + ' ' + fast_badge
         line = (ITALIC if enabled else "") + paint(f"» {quote(now, quotes)}", "muted")
         # Widen the header for the quote when the body is narrow.
         span = max(span, min(total, width(title) + width(line) + width(status) + 8))
@@ -984,8 +1020,7 @@ def render(data, now=None, forced=None):
     name_text = marker.replace("·", " ")
     quote_text = (ITALIC if enabled else "") + paint(quote(now, quotes), "muted")
     speed_text = f"{speed:.1f} t/s" if speed is not None else "— t/s"
-    if data.get("_agent") == "codex":
-        speed_text = "LAST " + speed_text
+    speed_text = speed_label + ' ' + speed_text
     spent = (f"{elapsed // 60}h{elapsed % 60:02d}m" if elapsed >= 60 else f"{elapsed}m") if elapsed else ""
     cost_text = " · ".join(t for t in ((f"${cost:.2f}" if cost is not None else ""), spent) if t)
     git_tone = ("amber" if git[1] else "green") if git else "muted"
@@ -1021,7 +1056,7 @@ def render(data, now=None, forced=None):
     def minimal(total):
         # Typography only: no frames, colour marks meaning.
         head = (paint(name_text, "accent", True) + "  " + paint(person, "muted") + "   " +
-                paint(display.lower(), display_tone, True))
+                paint(display.lower(), display_tone, True) + ' ' + fast_badge)
         place = paint(fit(path or "?", max(16, total - width(git_label) - 4)), "text") + \
             "   " + paint(git_label, git_tone)
         model_row = paint(core.lower(), "muted") + "   " + paint(access.lower(), mode_tone)
@@ -1045,7 +1080,7 @@ def render(data, now=None, forced=None):
             return edge("│") + " " + content + " " * max(0, inner - width(content)) + " " + edge("│")
 
         title = (" " + paint(name_text, "accent", True) + " " + paint(person, "muted") +
-                 edge(" · ") + paint(display, display_tone, True) + " ")
+                 edge(" · ") + paint(display, display_tone, True) + ' ' + fast_badge + " ")
         top = edge("╭─") + title + edge("─" * max(1, w - 3 - width(title))) + edge("╮")
         meters = "   ".join(meter(*m, cells=6 if i else 10, full="▰", empty="▱")
                            for i, m in enumerate(usage()))
@@ -1079,7 +1114,7 @@ def render(data, now=None, forced=None):
             status.append(pill(cost_text, "dark", "text", False))
         status.append(pill(speed_text, "dark", "muted", False))
         ctx = meters[0]
-        return [pill(name_text, "accent") + " " + pill(display, display_tone) + "  " + quote_text,
+        return [pill(name_text, "accent") + " " + pill(display, display_tone) + ' ' + fast_badge + "  " + quote_text,
                 pill(fit(path or "?", max(16, total - width(git_label) - 10)), "dark", "text", False) +
                 " " + pill(git_label, "dark", git_tone),
                 pill(core, "dark", "text", False) + " " + pill(access, "dark", mode_tone),
@@ -1142,7 +1177,7 @@ def render(data, now=None, forced=None):
 
     git_text = (git[0] + (" *" if git[1] else "")) if git else "NO REPO"
     first = paint(f"🍥 {face}", marker_tone, True) + "  " + paint(marker, marker_tone, True) + \
-        f" · {display} · {state} · {quote(now, quotes)}"
+        f" · {display} · {state} " + fast_badge + f" · {quote(now, quotes)}"
     second = f"GIT {git_text} │ CORE {core} │ " + plain("CTX", pct, ctx_note)
     third = plain("5H", q5, q5_reset) + " │ " + plain("7D", q7, q7_reset)
     return "\n".join(clip(row, columns) for row in (first, second, third))

@@ -75,7 +75,7 @@ def main():
     findings = []
     count = 0
     for relative, symlink, raw in files:
-        if relative.name in PRIVATE_NAMES or any(part in {'.ssh', '.aws', '.alicloud', 'backups', 'verification', 'session-registry'} for part in relative.parts):
+        if relative.name in PRIVATE_NAMES or any(part in {'.ssh', '.aws', '.alicloud', '.codex', '.claude', '.copilot', 'backups', 'verification', 'session-registry'} for part in relative.parts):
             findings.append((relative, 'private file category'))
         if symlink:
             findings.append((relative, 'symlink requires manual review'))

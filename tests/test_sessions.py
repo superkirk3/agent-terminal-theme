@@ -25,7 +25,7 @@ class SessionTest(unittest.TestCase):
 
     def test_same_project_sessions_and_agents_switch_independently(self):
         config.save_selection(cast='luffy', style='mecha')
-        os.environ.update({'AGENT_THEME_CAST': 'goku', 'CLAUDE_STATUSLINE_CAST': 'goku'})
+        os.environ.update({'AGENT_THEME_CAST': 'goku', 'CLAUDE_STATUSLINE_CAST': 'goku', 'COPILOT_STATUSLINE_CAST': 'goku'})
         base = {'cwd': '~/projects/example', 'model': {'display_name': 'Example'},
                 '_image_protocol': '', '_cast_state': 'idle', '_activity_state': 'IDLE', '_text_panel_only': True}
         for agent in config.AGENTS:

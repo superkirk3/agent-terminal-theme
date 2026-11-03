@@ -11,7 +11,15 @@ agent-theme show
 agent-theme reset --agent claude
 ```
 
-选择只保存在本机，不上传或跨机器同步。角色和布局可以分别修改；不带 `--session` 时，`--agent all` 是默认值，会更新两个客户端的默认字段。`reset` 清除所选客户端的默认值，不移除环境变量，也不删除会话级覆盖。
+选择只保存在本机，不上传或跨机器同步。角色、布局、轮播可以分别修改；不带 `--session` 时，`--agent all` 是默认值，会更新 Codex、Claude、Copilot 的默认字段。`reset` 清除所选客户端的默认值，不移除环境变量，也不删除会话级覆盖。
+
+```sh
+agent-theme set --rotation cycle --interval 30           # 默认每 30 秒轮播当前包的角色/动作
+agent-theme set --session SESSION_ID --rotation activity # 此会话跟随真实工作状态
+agent-theme set --agent copilot --cast bleach
+```
+
+轮播间隔可设为 10–3600 秒。群像按人物均匀轮换，再轮换每个人物的动作；不会更换所选主题包。文字工作状态与额度独立于头像轮播，等待批准/错误时优先显示对应状态头像。
 
 优先级：**指定 session 的覆盖 → 该客户端的环境变量 → 客户端保存的默认选择 → 会话随机选择**。按字段分别继承，例如只改某个会话的角色，不会改它的布局。Codex 使用 `AGENT_THEME_CAST` / `AGENT_THEME_STYLE`，Claude 使用 `CLAUDE_STATUSLINE_CAST` / `CLAUDE_STATUSLINE_STYLE`，两者互不覆盖。
 
@@ -76,11 +84,17 @@ agent-theme refresh
 - `MODE`：当前会话记录的权限模式。主题不修改权限。
 - `CTX`：本地会话记录提供的上下文使用量。
 - `5H`、`7D`：CLI 记录提供的额度窗口；没有数据时显示 `N/A` / `NO SIGNAL`。
-- `LAST`：Codex 已记录 token 事件计算的输出速度估计，不是实时生成速率。
+- `AVG`：Codex 整轮输出 token 总和 / 整轮耗时。工具执行与等待也计入分母；新一轮开始后重新计数。新格式直接使用 `turn_token_usage`，旧格式使用去重后的累计输出差值。
+- `API`：Copilot 最近请求的输出 token / `duration`（毫秒转秒）；Claude 使用会话累计输出 token / 累计 API 耗时。包含首 token 等待，不是纯解码速度。
+- `EST`：Claude 未提供 API 耗时的情况下，按转录时间估计。无有效计数/耗时则显示未知。
+- `[FAST ON/OFF/?]`：客户端明确报告的速度模式；Codex `priority` / `fast` 显示 ON，明确的标准层显示 OFF，未报告则显示问号。只显示、不启用或改变模式；服务端实际调度也可能与客户端请求不同。
+- `TOKENS`：Copilot 本机日志记录的请求 token 累计。premium-request cost 不当作美元价格显示。
 
 不估算账户余额、订阅余量或不存在的五小时额度。字段可用性取决于 CLI 版本、账户和日志格式。Codex 长日志使用增量读取，避免工具输出过长后丢失本轮的工作状态与推理强度。
 
-Claude 接收官方状态栏 JSON；Codex 读取本机 `CODEX_HOME`（默认 `~/.codex`）内的会话记录和模型默认配置。这些数据不上传到本项目或 GitHub。
+Claude 接收官方状态栏 JSON；Codex 读取本机 `CODEX_HOME`（默认 `~/.codex`）内的会话记录和模型默认配置。Copilot 读取 `COPILOT_HOME`（默认 `~/.copilot`）内归属明确的会话事件。这些数据不上传到本项目或 GitHub。Fast 字段来源参见 [OpenAI 官方速度模式说明](https://learn.chatgpt.com/docs/agent-configuration/speed)。
+
+Copilot 对应环境变量为 `COPILOT_STATUSLINE_CAST`、`COPILOT_STATUSLINE_STYLE`、`COPILOT_STATUSLINE_ROTATION`、`COPILOT_STATUSLINE_INTERVAL`；Codex 和 Claude 使用各自前缀的 `ROTATION` / `INTERVAL` 设置轮播。会话级覆盖优先级最高。
 
 ## 文件位置
 

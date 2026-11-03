@@ -25,15 +25,18 @@ def main():
     socket = env.get('AGENT_THEME_SOCKET') or 'agent-theme-'+uuid.uuid4().hex
     cwd = str(Path.cwd())
     args = sys.argv[1:]
+    agent = env.get('AGENT_THEME_AGENT', 'codex')
+    if agent not in ('codex', 'copilot'): raise SystemExit('Unknown agent')
     session_id = next((x for x in args if re.fullmatch(r'[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}',x)), '') if 'resume' in args else ''
-    cmd = [env['AGENT_THEME_REAL_CODEX'], '-c', 'tui.status_line=["task-progress"]', *args]
+    cmd = ([env['AGENT_THEME_REAL_COPILOT'], *args] if agent == 'copilot' else
+           [env['AGENT_THEME_REAL_CODEX'], '-c', 'tui.status_line=["task-progress"]', *args])
     launch = shlex.join(cmd)
     cleanup = shlex.join(['tmux','-L',socket,'kill-session','-t','agent'])
     launch += '; code=$?; if [ "$code" -ne 0 ]; then printf "\\nCodex exited (%s). Press Enter.\\n" "$code"; read -r reply; fi; '+cleanup
     def tmux(*args, check=True):
         return subprocess.run(['tmux','-L',socket,'-f','/dev/null',*args],env=env,check=check,capture_output=True,text=True)
     panel = [sys.executable,str(Path(__file__).with_name('codex-pane.py')),
-             '--since',str(time.time()-3),'--cwd',cwd,'--instance',socket]
+             '--since',str(time.time()-3),'--cwd',cwd,'--instance',socket,'--agent',agent]
     if session_id:
         panel += ['--session-id',session_id]
     if env.get('TMUX'):
@@ -43,6 +46,7 @@ def main():
     state_dir = ''
     try:
         tmux('new-session','-d','-c',cwd,'-s','agent',launch)
+        if agent == 'copilot': tmux('set-option', '-p', '-t', 'agent:0.0', '@agent-theme-copilot', 'managed')
         owner = tmux('display-message', '-p', '-t', 'agent:0.0', '#{pane_pid}').stdout.strip()
         if owner.isdigit(): panel += ['--owner-pid', owner]
         for key,value in [('status','off'),('mouse','on'),('allow-passthrough','all'),('default-terminal','tmux-256color')]:

@@ -34,6 +34,11 @@ PALETTE = {
 def when(value: str | None) -> float:
     if not value:
         return 0.0
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        # Modern task lifecycle fields use Unix milliseconds; JSONL timestamps
+        # remain ISO strings. Accept Unix seconds for older event producers.
+        return value/1000 if value >= 100_000_000_000 else float(value)
+    if not isinstance(value, str): return 0.0
     try:
         return datetime.fromisoformat(value.replace("Z", "+00:00")).timestamp()
     except ValueError:
@@ -125,6 +130,12 @@ def summarize(rows: list[dict], now: float, fallback_model: tuple[str, str], pre
     total_tokens = previous.get('total_tokens')
     context_window = previous.get('context_window')
     approval = previous.get('approval', 'on-request')
+    turn_output = previous.get('_turn_output', 0)
+    structured = previous.get('_structured_usage', False)
+    signature = previous.get('_usage_signature')
+    last_total_output = previous.get('_last_total_output')
+    service_tier = previous.get('service_tier')
+    tier_known = previous.get('tier_known', False)
     for row in rows:
         timestamp = when(row.get("timestamp"))
         payload = row.get("payload") or {}
@@ -133,18 +144,45 @@ def summarize(rows: list[dict], now: float, fallback_model: tuple[str, str], pre
             model = payload.get("model") or model
             effort = payload.get("effort") or effort
             approval = payload.get("approval_policy") or approval
+            if 'service_tier' in payload:
+                service_tier, tier_known = payload['service_tier'], True
+        elif kind == 'thread_settings_applied':
+            settings = payload.get('thread_settings') or {}
+            model = settings.get('model') or model
+            effort = settings.get('reasoning_effort') or effort
+            if 'service_tier' in settings:
+                service_tier, tier_known = settings['service_tier'], True
+        elif row.get('type') == 'token_usage_record':
+            usage = payload.get('turn_token_usage') or {}
+            output = usage.get('output_tokens')
+            if isinstance(output, (int, float)) and output >= 0:
+                turn_output, structured = output, True
+                if started and timestamp > started:
+                    last_turn_speed = turn_output/(timestamp-started)
         elif kind == "task_started":
-            started = timestamp
+            started = when(payload.get('started_at')) or timestamp
+            context_window = payload.get('model_context_window') or context_window
+            turn_output, structured, last_turn_speed = 0, False, None
         elif kind in {"task_complete", "turn_aborted", "task_cancelled"}:
-            ended = timestamp
+            ended = when(payload.get('completed_at')) or timestamp
+            duration = payload.get('duration_ms')
+            seconds = duration/1000 if isinstance(duration, (int, float)) and duration > 0 else ended-started
+            last_turn_speed = turn_output/seconds if started and seconds > 0 and turn_output > 0 else None
         elif kind == "token_count":
             info = payload.get("info") or {}
             usage = info.get("total_token_usage") or {}
             last = info.get("last_token_usage") or {}
             output = last.get("output_tokens")
-            if (isinstance(output, (int, float)) and output > 0 and started
-                    and 0 < timestamp - started < 600):
-                last_turn_speed = output / (timestamp - started)
+            cumulative = usage.get('output_tokens')
+            current_signature = (usage.get('total_tokens'), usage.get('output_tokens'))
+            if current_signature != signature and isinstance(output, (int, float)) and output > 0:
+                delta = (max(0, cumulative-last_total_output) if isinstance(cumulative, (int, float))
+                         and isinstance(last_total_output, (int, float)) else output)
+                if not structured: turn_output += delta
+                signature = current_signature
+                if started and timestamp > started:
+                    last_turn_speed = turn_output/(timestamp-started)
+            if isinstance(cumulative, (int, float)): last_total_output = cumulative
             total = usage.get("total_tokens")
             if isinstance(total, (int, float)):
                 total_tokens = int(total)
@@ -171,6 +209,13 @@ def summarize(rows: list[dict], now: float, fallback_model: tuple[str, str], pre
         "approval": approval,
         "ended": ended,
         "_started": started,
+        '_turn_output': turn_output,
+        '_structured_usage': structured,
+        '_usage_signature': signature,
+        '_last_total_output': last_total_output,
+        'service_tier': service_tier,
+        'tier_known': tier_known,
+        'speed_label': 'AVG',
     }
 
 
@@ -202,7 +247,7 @@ def session_counters(path: Path | None, now: float, fallback_model: tuple[str, s
                     row = json.loads(line)
                 except (ValueError, UnicodeDecodeError):
                     continue
-                if row.get('type') in ('turn_context', 'event_msg'):
+                if row.get('type') in ('turn_context', 'event_msg', 'token_usage_record'):
                     state = summarize([row], now, fallback_model, state)
         cached['state'] = state
         _SESSION_COUNTERS[path] = cached

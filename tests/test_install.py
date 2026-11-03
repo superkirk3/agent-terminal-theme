@@ -132,5 +132,22 @@ class InstallTest(unittest.TestCase):
         self.assertFalse((self.home/'.local/share/agent-theme/bin/codex').exists())
         self.assertIn(install.BEGIN, (self.home/'.bashrc').read_text())
 
+    def test_copilot_entry_preserves_binary_settings_and_other_components(self):
+        settings = self.home/'.copilot/settings.json'
+        settings.parent.mkdir()
+        settings.write_text('{"statusLine":{"command":"existing-hook"}}')
+        original = settings.read_bytes()
+        install.install(self.args(codex=False, claude=False, copilot=True, copilot_bin=str(self.binary)), self.home)
+        wrapper = self.home/'.local/share/agent-theme/bin/copilot'
+        self.assertTrue(wrapper.exists())
+        self.assertEqual(settings.read_bytes(), original)
+        result = subprocess.run([sys.executable, str(wrapper), '--version'],
+            env=dict(os.environ, AGENT_THEME_REAL_COPILOT=str(self.binary)), capture_output=True, text=True, check=True)
+        self.assertEqual(result.stdout.strip(), 'codex test')
+        uninstall.uninstall(self.home, codex=False, claude=False, copilot=True)
+        self.assertFalse(wrapper.exists())
+        self.assertEqual(settings.read_bytes(), original)
+        self.assertTrue(self.binary.exists())
+
 
 if __name__ == '__main__': unittest.main()

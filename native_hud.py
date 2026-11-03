@@ -29,9 +29,13 @@ def create(socket, target, panel, state_dir, watch_socket, cwd, env=None):
     state_dir = Path(state_dir)
     state = str(state_dir/'portrait.json')
     owner = str(state_dir)
-    prefix = ['env', '-u', 'AGENT_THEME_STYLE', '-u', 'AGENT_THEME_CAST',
-              '-u', 'AGENT_THEME_PREFERENCES', 'AGENT_THEME_TERMINAL=windowsterminal']
-    for key in ('AGENT_THEME_STYLE', 'AGENT_THEME_CAST', 'AGENT_THEME_PREFERENCES', 'CODEX_HOME'):
+    keys = ('AGENT_THEME_STYLE', 'AGENT_THEME_CAST', 'AGENT_THEME_PREFERENCES', 'AGENT_THEME_ROTATION', 'AGENT_THEME_INTERVAL',
+                'COPILOT_STATUSLINE_CAST', 'COPILOT_STATUSLINE_STYLE', 'COPILOT_STATUSLINE_ROTATION', 'COPILOT_STATUSLINE_INTERVAL',
+                'COPILOT_HOME', 'CODEX_HOME')
+    prefix = ['env']
+    for key in keys: prefix += ['-u', key]
+    prefix.append('AGENT_THEME_TERMINAL=windowsterminal')
+    for key in keys:
         if env and env.get(key):
             prefix.append(key+'='+env[key])
     panel = [*prefix, *panel, '--native-state', state,

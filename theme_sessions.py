@@ -89,13 +89,8 @@ def resolve(value, agent='all'):
     return {'agent': agent, 'session_id': config.session_key(agent, value), 'aliases': []}
 
 
-def owned_codex_session(owner_pid, home):
-    """Resolve only open CLI rollout files owned by this TUI's process tree.
-
-    Working-directory guesses are unsafe when two sessions share a project.
-    If ownership cannot be established, callers keep their unique HUD ID.
-    """
-    if not owner_pid: return ''
+def process_tree(owner_pid):
+    if not owner_pid: return set()
     try:
         table = subprocess.run(['ps', '-axo', 'pid=,ppid='], capture_output=True, text=True,
                                timeout=1, check=True).stdout
@@ -109,6 +104,16 @@ def owned_codex_session(owner_pid, home):
             if pid in descendants: continue
             descendants.add(pid)
             pending.extend(children.get(pid, []))
+        return descendants
+    except (OSError, ValueError, subprocess.SubprocessError):
+        return set()
+
+
+def owned_paths(owner_pid):
+    """Read open file paths from this process tree, never another same-cwd CLI."""
+    descendants = process_tree(owner_pid)
+    if not descendants: return set()
+    try:
         paths = set()
         if Path('/proc/self/fd').is_dir():
             for pid in descendants:
@@ -119,6 +124,15 @@ def owned_codex_session(owner_pid, home):
             output = subprocess.run(['lsof', '-n', '-P', '-a', '-p', ','.join(map(str, descendants)), '-Fn'],
                                     capture_output=True, text=True, timeout=1).stdout
             paths = {Path(line[1:]) for line in output.splitlines() if line.startswith('n/')}
+        return paths
+    except (OSError, ValueError, subprocess.SubprocessError):
+        return set()
+
+
+def owned_codex_session(owner_pid, home):
+    """Require exactly one open CLI rollout; ambiguous ownership stays unknown."""
+    try:
+        paths = owned_paths(owner_pid)
         root = (home/'sessions').resolve()
         identities = set()
         for path in paths:
@@ -133,3 +147,31 @@ def owned_codex_session(owner_pid, home):
         return identities.pop() if len(identities) == 1 else ''
     except (OSError, ValueError, subprocess.SubprocessError):
         return ''
+
+
+def owned_copilot_session(owner_pid, home):
+    root = (home/'session-state').resolve()
+    identities = set()
+    for path in owned_paths(owner_pid):
+        if not path.is_relative_to(root): continue
+        parts = path.relative_to(root).parts
+        if len(parts) != 2 or not (parts[1] == 'session.db' or parts[1].startswith('inuse.')): continue
+        try: identities.add(config.session_key('copilot', parts[0]))
+        except ValueError: pass
+    return identities.pop() if len(identities) == 1 else ''
+
+
+def owned_copilot_pid(owner_pid):
+    """WSL: identify a native CLI even while it has no session open yet."""
+    candidates = {}
+    for pid in process_tree(owner_pid):
+        try:
+            proc = Path(f'/proc/{pid}')
+            args = (proc/'cmdline').read_bytes().split(b'\0')
+            if Path(os.fsdecode(args[0])).name != 'copilot': continue
+            if any(b'extension_bootstrap' in value for value in args[1:]): continue
+            parent = int((proc/'stat').read_text().rsplit(')', 1)[1].split()[1])
+            candidates[pid] = parent
+        except (OSError, ValueError, IndexError): pass
+    roots = {pid for pid, parent in candidates.items() if parent not in candidates}
+    return roots.pop() if len(roots) == 1 else 0

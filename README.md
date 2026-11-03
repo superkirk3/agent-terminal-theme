@@ -1,6 +1,6 @@
 # Agent Terminal Theme
 
-为 **Codex CLI** 和 **Claude Code** 提供统一的动漫状态栏：12 组角色、4 种布局、中英文台词、上下文与额度进度条，以及支持终端中的真实动画。
+为 **Codex CLI**、**Claude Code** 和 **GitHub Copilot CLI（WSL）** 提供统一的动漫状态栏：12 组角色、4 种布局、中英文台词、人物轮播、Fast 模式标记，以及支持终端中的真实动画。
 
 适用于 **macOS** 和 **Windows Terminal + WSL**。运行时仅使用 Python 标准库；主题本身不需要 API key，也不会上传会话或配置。
 
@@ -17,6 +17,8 @@
 | 其他终端 | 彩色字符头像回退 | 彩色字符头像回退 |
 
 Codex 使用单独的五行 tmux HUD；Claude 使用官方 `statusLine` 命令。它们共享素材和布局，但接入方式不同。Claude 在 Windows Terminal/Rex 中不发送实验性的图片转义序列，以保持文字显示稳定。
+
+Copilot 在 WSL 复用 Codex 的独立 tmux 图片/文字面板，保留真实动图。它不覆盖 Copilot 已有的 `statusLine`、账户或模型设置；已运行的 tmux Copilot 也可挂载面板，见 [Copilot 接入](docs/COPILOT.md)。
 
 ## 快速开始
 
@@ -53,6 +55,9 @@ python3 install.py --codex --shell zsh
 # 只装 Claude，不要求已安装 Codex 或 tmux
 python3 install.py --claude
 
+# WSL：只装 Copilot，或把 --copilot 加到其他安装选项后
+python3 install.py --copilot
+
 # 不确定改动时先预览
 python3 install.py --codex --claude --dry-run
 
@@ -71,11 +76,11 @@ Claude 设置采用合并写入；旧设置和 shell 启动文件的备份只保
 ```sh
 agent-theme                                         # 交互选择
 agent-theme list                                    # 查看角色、布局
-agent-theme set --cast luffy --style mecha           # 同时切换 Codex 和 Claude
+agent-theme set --cast luffy --style mecha           # 切换所有客户端默认值
 agent-theme set --agent claude --cast gojo --style pill  # 只切换 Claude
 agent-theme show                                    # 查看当前选择
 agent-theme reset --agent codex                     # 恢复 Codex 的会话随机选择
-agent-theme reset                                  # 恢复两者的会话随机选择
+agent-theme reset                                  # 恢复所有客户端的会话随机选择
 ```
 
 从另一个终端标签或 tmux 面板执行即可。**已运行的状态栏会在下次刷新时读取选择，无需中断任务**；命令只保存显示偏好，不重启客户端。选择保存在本机 `~/.config/agent-theme/preferences.json`，更新和卸载都会保留。
@@ -115,6 +120,18 @@ AGENT_THEME_WINDOWS_TEXT=1 codex
 
 布局：`mecha`、`minimal`、`card`、`pill`；默认随机选择并尽量在同一会话中保持稳定。素材含多种状态，缺少的状态会使用回退动画。
 
+### 人物自动轮播、Fast 与速度
+
+默认每 **30 秒**切换当前角色包内的动画。群像主题 `bleach`、`kimetsu` 会轮到各个人物；其他主题轮播该人物的不同动作。头像和台词轮播时，工作状态、错误与额度仍来自真实会话，明确的等待/错误状态优先显示对应头像。
+
+```sh
+agent-theme set --rotation cycle --interval 30
+agent-theme set --agent copilot --cast bleach --style mecha
+agent-theme set --session SESSION_ID --rotation activity  # 此会话按实际工作状态选头像
+```
+
+`[FAST ON]` / `[FAST OFF]` 表示 CLI 明确提供的模式，`[FAST ?]` 表示来源未提供信息。主题只显示模式，不替你开启 Fast。速度行已改为明确的平均值：Codex `AVG` 是整轮输出 token / 整轮耗时，包含工具与等待；Copilot `API` 是最近单次请求输出 token / API 耗时；Claude 有累计 API 耗时时显示 `API`，否则显示转录估计 `EST`。这些都不是瞬时解码速度。详见 [指标口径](docs/CONFIGURATION.md#显示内容)。
+
 `--cast random` / `--style random` 表示按会话自动选择。若之前在 shell 中 `export` 了角色或布局，`agent-theme show` 会提示覆盖。可以用 `--session` 直接覆盖指定会话；若要让整个客户端跟随默认值，需去掉这些变量后启动新会话。
 
 从旧版升级时，先按下节更新安装，再运行 `agent-theme refresh` 加载新的 Codex HUD 代码。它只刷新经验证的主题渲染面板，保留 Codex 主进程及任务；之后切换主题无需刷新面板或重启会话。Claude 状态栏会在下次调用时加载新代码。选择 `--shell none` 的用户可以直接执行 `python3 "$HOME/.local/share/agent-theme/theme.py"`，参数相同。
@@ -131,7 +148,7 @@ python3 install.py --codex --claude
 . "$HOME/.local/share/agent-theme/shell.sh"
 agent-theme refresh
 
-# 卸载两个入口，或加 --codex / --claude 只卸载其中之一
+# 卸载所有入口，或加 --codex / --claude / --copilot 单独卸载
 python3 uninstall.py
 ```
 
@@ -161,4 +178,5 @@ python3 tools/privacy_audit.py
 - [OpenAI：Codex 配置参考](https://learn.chatgpt.com/docs/config-file/config-reference)
 - [Anthropic：Claude Code 状态栏](https://code.claude.com/docs/en/statusline)
 - [Anthropic：Claude Code 安装](https://code.claude.com/docs/en/setup)
+- [GitHub：Copilot CLI 配置目录](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-config-dir-reference)
 - [tmux](https://github.com/tmux/tmux)

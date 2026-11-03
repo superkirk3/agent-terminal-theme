@@ -8,7 +8,7 @@ import re
 from install import BEGIN, END, load_manifest, private_json
 
 
-def uninstall(home=None, codex=True, claude=True):
+def uninstall(home=None, codex=True, claude=True, copilot=True):
     home = home or Path.home()
     state = home/'.local/state/agent-theme/install.json'
     manifest = load_manifest(home)
@@ -20,6 +20,10 @@ def uninstall(home=None, codex=True, claude=True):
         if wrapper.exists() and b'Agent theme Codex launcher' in wrapper.read_bytes()[:300]:
             wrapper.unlink()
         manifest['components'].remove('codex')
+    if copilot and 'copilot' in manifest.get('components', []):
+        wrapper = home/'.local/share/agent-theme/bin/copilot'
+        if wrapper.exists() and b'Agent theme Copilot launcher' in wrapper.read_bytes()[:300]: wrapper.unlink()
+        manifest['components'].remove('copilot')
     if claude and 'claude' in manifest.get('components', []):
         settings = home/'.claude/settings.json'
         data = json.loads(settings.read_text()) if settings.exists() else {}
@@ -48,8 +52,10 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--codex', action='store_true')
     parser.add_argument('--claude', action='store_true')
+    parser.add_argument('--copilot', action='store_true')
     args = parser.parse_args()
-    uninstall(codex=args.codex or not args.claude, claude=args.claude or not args.codex)
+    all_agents = not (args.codex or args.claude or args.copilot)
+    uninstall(codex=args.codex or all_agents, claude=args.claude or all_agents, copilot=args.copilot or all_agents)
 
 
 if __name__ == '__main__': main()

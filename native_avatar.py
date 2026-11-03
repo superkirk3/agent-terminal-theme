@@ -5,10 +5,12 @@ import json
 import os
 from pathlib import Path
 import sys
+import struct
 import time
+import zlib
 
 import portable_images as graphics
-from sixel_frames import render_frame
+from sixel_frames import load_frame, render_frame
 
 ROOT = Path(__file__).resolve().parent
 BG = (40, 44, 52)
@@ -63,7 +65,18 @@ def paint(key_provider, seconds=0, stats='', bottom_padding=1, watch_socket=''):
             frame = graphics.frame_at(folder, time.time()) if folder else None
             identity = (str(frame), dimensions)
             if frame and dimensions and identity != previous:
-                raw = render_frame(str(frame), *dimensions, matte=BG)
+                try:
+                    _, _, _, pixels = load_frame(str(frame))
+                    # Some source animations contain completely transparent
+                    # transition frames. Retain the visible frame through them.
+                    if pixels.count(255) == len(pixels):
+                        time.sleep(.2)
+                        continue
+                    raw = render_frame(str(frame), *dimensions, matte=BG)
+                except (OSError, ValueError, struct.error, zlib.error):
+                    # An incomplete/custom asset must not kill the image pane.
+                    time.sleep(.2)
+                    continue
                 # Native tmux owns the pane, image, and cursor. No passthrough,
                 # ancestor coordinates, manual erases, or DECSET 2026 are used.
                 sys.stdout.buffer.write(b'\x1b[1;1H'+raw)

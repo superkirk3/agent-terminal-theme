@@ -41,6 +41,8 @@ python3 install.py --codex --claude --shell bash
 
 如果使用 zsh，替换为 `--shell zsh`。只部署一个客户端时保留对应的 `--codex` 或 `--claude`。
 
+已经安装 GitHub Copilot CLI 时可追加 `--copilot`，或单独运行 `python3 install.py --copilot`。运行中的 tmux Copilot 可执行 `agent-theme refresh` 挂载同一套动图 HUD，无需退出任务。详细步骤与指标口径见 [Copilot 接入](COPILOT.md)。
+
 ## 3. 设置 Windows Terminal
 
 1. 在 **Windows** 安装支持中文的 Nerd Font，例如 Maple Mono NF CN。

@@ -27,6 +27,7 @@ verification/
 private/
 .claude/
 .codex/
+.copilot/
 .ssh/
 .aws/
 .alicloud/

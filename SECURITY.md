@@ -4,6 +4,7 @@
 
 - Claude：从 stdin 接收 Claude Code 提供的状态栏 JSON。
 - Codex：读取本机 `CODEX_HOME` 内的会话记录和模型默认配置，提取模型、推理强度、状态、token 与额度字段。
+- Copilot：只读取所属进程打开的会话事件，提取状态、token、缓存与请求耗时；不读取认证配置，不保存提示词或工具输出。
 - 终端：调用本地 tmux、ps 和 Git 命令进行布局、终端识别及分支查询。
 - 安装器：读取并合并 Claude 的设置文件，以及用户选择的 shell 启动文件。
 
@@ -16,6 +17,8 @@
 `agent-theme` 将客户端和会话的角色/布局写入本机 `~/.config/agent-theme/preferences.json`，文件权限为 600。会话发现记录位于 `~/.local/state/agent-theme/session-registry/`，包含本机 session/HUD ID、项目目录、显示选择和刷新时间；目录 700、文件 600。它们不包含提示词、聊天内容或凭据，相关文件和目录已列入忽略和发布检查规则。
 
 按会话切换只写显示偏好，不向客户端发送输入或终止信号。可选的 `agent-theme refresh` 用于升级旧版 Codex HUD：仅重新启动经验证的主题渲染面板，保留 Codex 主进程及正在执行的任务。它会跳过空闲 shell 和无关程序。
+
+在 WSL 上，`refresh` 还可给已运行、归属可验证的 tmux Copilot 添加独立图片/文字面板。管理器在原 CLI 退出后仅清理带有自身所有权标记的辅助面板；不清理其他会话，也不写 Copilot 的 `settings.json` 或账户状态。
 
 WSL 剪贴板桥接仅在你触发粘贴时读取 Windows 剪贴板，不替换系统剪贴板内容。文字通过内存和用后删除的 tmux buffer 传递；截图缓存位于 `~/.cache/agent-theme/clipboard/`，目录 700、文件 600。桥接不记录剪贴板内容，不发送额外的 Enter，不向模型提交提示词；正常发送附件仍由你操作原版 CLI。
 

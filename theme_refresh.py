@@ -73,6 +73,13 @@ def refresh():
                 inner = socket
                 if '--watch-socket' in tokens:
                     inner = Path(tokens[tokens.index('--watch-socket')+1])
+                if '--agent' in tokens and tokens[tokens.index('--agent')+1] == 'copilot' and inner == socket:
+                    # Hot-attached HUDs watch their native CLI PID in this server.
+                    if '--owner-pid' not in tokens: continue
+                    os.kill(int(tokens[tokens.index('--owner-pid')+1]), 0)
+                    result = tmux(socket, 'respawn-pane', '-k', '-t', pane, shlex.join(tokens))
+                    if not result.returncode: count += 1
+                    continue
                 owner = tmux(inner, 'display-message', '-p', '-t', 'agent:0.0', '#{pane_id}\t#{pane_pid}')
                 values = owner.stdout.strip().split('\t')
                 if owner.returncode or len(values) != 2 or not values[1].isdigit(): continue

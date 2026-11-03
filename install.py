@@ -12,6 +12,7 @@ import tempfile
 
 SOURCE = Path(__file__).resolve().parent
 RUNTIME = ('theme_config.py', 'theme_sessions.py', 'theme_refresh.py', 'theme.py', 'windows_paste.py', 'windows-paste.zsh', 'statusline.py', 'codex-launch.py', 'codex-hud.py', 'codex-pane.py',
+           'copilot-launch.py', 'copilot_attach.py', 'copilot_hud_status.py',
            'codex_hud_status.py', 'portable_images.py', 'sixel_frames.py',
            'native_avatar.py', 'native_hud.py', 'shell.sh', 'cast.json',
            'naruto-quotes.json', 'naruto-sprites.json')
@@ -66,6 +67,20 @@ def backup_file(path, backup, label):
     saved.chmod(0o600)
 
 
+def discover_copilot(home, explicit=None, previous=None):
+    candidates = ([Path(explicit).expanduser().absolute()] if explicit else
+                  ([Path(previous)] if previous else []) + [home/'.local/bin/copilot'] +
+                  [Path(part)/'copilot' for part in os.get_exec_path() if part])
+    target = (home/'.local/share/agent-theme').resolve()
+    for path in candidates:
+        if not path.is_file() or not os.access(path, os.X_OK): continue
+        if path.resolve().is_relative_to(target) or path.suffix.lower() == '.exe': continue
+        with path.open('rb') as stream: header = stream.read(300)
+        if b'Agent theme Copilot launcher' in header or b'node.exe' in header: continue
+        return str(path.absolute())
+    raise RuntimeError('Linux/macOS Copilot CLI not found. Install it first or pass --copilot-bin PATH.')
+
+
 def install(args, home=None):
     home = home or Path.home()
     if os.name != 'posix': raise RuntimeError('Use macOS or WSL. Native PowerShell is not supported.')
@@ -76,6 +91,11 @@ def install(args, home=None):
     manifest.setdefault('version', 1)
     manifest.setdefault('components', [])
     real = None
+    copilot = getattr(args, 'copilot', False)
+    real_copilot = None
+    if copilot:
+        if not shutil.which('tmux'): raise RuntimeError('tmux is required for the Copilot HUD.')
+        real_copilot = discover_copilot(home, getattr(args, 'copilot_bin', None), manifest.get('real_copilot'))
     if args.codex:
         if not shutil.which('tmux'): raise RuntimeError('tmux is required for the Codex HUD.')
         real = discover_codex(home, args.codex_bin, manifest.get('real_codex'))
@@ -87,7 +107,7 @@ def install(args, home=None):
     data = json.loads(settings.read_text()) if args.claude and settings.exists() else {}
     if not isinstance(data, dict): raise RuntimeError('Claude settings must contain a JSON object.')
     summary = {'target': str(target), 'codex': args.codex, 'claude': args.claude,
-               'shell': shell, 'real_codex': real}
+               'copilot': copilot, 'shell': shell, 'real_codex': real, 'real_copilot': real_copilot}
     if args.dry_run:
         print(json.dumps(summary, indent=2))
         return summary
@@ -108,6 +128,12 @@ def install(args, home=None):
         wrapper.chmod(0o755)
         manifest['real_codex'] = real
         if 'codex' not in manifest['components']: manifest['components'].append('codex')
+    if copilot:
+        wrapper = target/'bin/copilot'
+        shutil.copy2(SOURCE/'copilot-launch.py', wrapper)
+        wrapper.chmod(0o755)
+        manifest['real_copilot'] = real_copilot
+        if 'copilot' not in manifest['components']: manifest['components'].append('copilot')
     if shell != 'none':
         startup = Path(args.shell_file).expanduser().absolute() if args.shell_file else home/('.'+shell+'rc')
         text = startup.read_text() if startup.exists() else ''
@@ -144,12 +170,14 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--codex', action='store_true', help='Install the Codex HUD entry point')
     parser.add_argument('--claude', action='store_true', help='Set Claude Code statusLine')
+    parser.add_argument('--copilot', action='store_true', help='Install the GitHub Copilot CLI tmux HUD')
     parser.add_argument('--codex-bin', help='Path to an existing Linux/macOS Codex executable')
+    parser.add_argument('--copilot-bin', help='Path to an existing Linux/macOS Copilot CLI executable')
     parser.add_argument('--shell', choices=('auto', 'bash', 'zsh', 'none'), default='auto')
     parser.add_argument('--shell-file', help='Optional shell startup file override')
     parser.add_argument('--dry-run', action='store_true', help='Show planned changes without writing files')
     args = parser.parse_args()
-    if not (args.codex or args.claude): parser.error('Choose --codex, --claude, or both.')
+    if not (args.codex or args.claude or args.copilot): parser.error('Choose --codex, --claude and/or --copilot.')
     try: install(args)
     except (OSError, ValueError, RuntimeError) as error:
         parser.exit(1, str(error)+'\n')

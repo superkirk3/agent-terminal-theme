@@ -9,6 +9,7 @@ import time
 import zlib
 
 import codex_hud_status as counters
+import copilot_hud_status
 import portable_images as graphics
 import statusline as theme
 import theme_sessions
@@ -25,7 +26,7 @@ def delete_avatar(image_id, layers):
     return graphics.wrap(f'\x1b_Ga=d,d=I,i={image_id},q=2\x1b\\'.encode(), layers)
 
 
-def snapshot(state, cwd, identity, now):
+def snapshot(state, cwd, identity, now, agent='codex'):
     rates = {}
     if state.get('limits'):
         _, limits = state['limits']
@@ -39,16 +40,22 @@ def snapshot(state, cwd, identity, now):
     wanted = 'think' if state['busy'] else ('done' if now-state.get('ended', 0) < 60 else 'idle')
     if state['busy'] and max([v['used_percentage'] or 0 for v in rates.values()] or [0]) >= 80:
         wanted = 'power'
-    return {'session_id': 'codex:'+identity, 'cwd': cwd,
+    result = {'session_id': agent+':'+identity, 'cwd': cwd,
             'model': {'display_name': state['model']}, 'effort_level': state['effort'],
             'context_window': {'context_window_size': state.get('context_window'),
                                'used_percentage': state['context_used']},
             'permission_mode': state.get('approval', 'on-request'), 'rate_limits': rates,
-            '_agent': 'codex', '_context_unknown': not state.get('context_window'),
-            '_activity_state': 'WORKING' if state['busy'] else 'IDLE',
-            '_cast_state': wanted, '_display_label': 'WORKING' if state['busy'] else '',
+            '_agent': agent, '_context_unknown': not state.get('context_window'),
+            '_activity_state': state.get('activity') or ('WORKING' if state['busy'] else 'IDLE'),
+            '_cast_state': state.get('cast_state', wanted) if state['busy'] else wanted,
+            '_display_label': 'WORKING' if state['busy'] else '',
             '_tokens_per_second': state['speed'], '_text_panel_only': True,
-            '_image_protocol': ''}
+            '_speed_label': state.get('speed_label', 'AVG'),
+            '_total_tokens': state.get('total_tokens'),
+            'prompt_cache': {'hit_ratio': state.get('cache_ratio')}, '_image_protocol': ''}
+    if state.get('tier_known'): result['service_tier'] = state.get('service_tier')
+    if 'fast_mode' in state: result['fast_mode'] = state['fast_mode']
+    return result
 
 
 def origin(args):
@@ -83,11 +90,15 @@ def main():
     p.add_argument('--native-state', default='')
     p.add_argument('--watch-socket', default='')
     p.add_argument('--owner-pid', type=int, default=0)
+    p.add_argument('--agent', choices=('codex', 'copilot'), default='codex')
     args = p.parse_args()
     args.log = None
-    home = Path(os.environ.get('CODEX_HOME', Path.home()/'.codex'))
+    copilot = args.agent == 'copilot'
+    adapter = copilot_hud_status if copilot else counters
+    owner_session = theme_sessions.owned_copilot_session if copilot else theme_sessions.owned_codex_session
+    home = Path(os.environ.get('COPILOT_HOME' if copilot else 'CODEX_HOME', Path.home()/('.copilot' if copilot else '.codex')))
     if args.session_id:
-        args.log = counters.session_by_id(home, args.session_id)
+        args.log = adapter.session_by_id(home, args.session_id)
     # A footer can use the full five lines of every Claude layout.
     os.environ['LINES'] = '30'
     terminal = graphics.terminal_kind()
@@ -119,8 +130,15 @@ def main():
             if size.lines != 5:
                 graphics.tmux('resize-pane', '-t', os.environ['TMUX_PANE'], '-y', '5')
             if now >= next_state:
-                state = counters.current_state(args, now, home)
-                owned = theme_sessions.owned_codex_session(args.owner_pid, home)
+                owned = owner_session(args.owner_pid, home)
+                if args.owner_pid:
+                    # Explicit resume/session IDs remain authoritative when a
+                    # CLI delegates its file writer outside this process tree.
+                    bound = owned or args.session_id
+                    args.log = adapter.session_by_id(home, bound) if bound else None
+                    state = adapter.session_counters(args.log, now, counters.config_model(home) if not copilot else None)
+                elif copilot: state = adapter.session_counters(args.log, now)
+                else: state = counters.current_state(args, now, home)
                 session_identity = owned or args.session_id or args.instance
                 next_state = now+.9
             if not text_only and (now >= next_origin or size != last_size):
@@ -132,7 +150,7 @@ def main():
                 next_origin = now+2
                 last_size = size
             os.environ['COLUMNS'] = str(max(60, size.columns+(12 if native else 0)))
-            data = snapshot(state, args.cwd, session_identity, now)
+            data = snapshot(state, args.cwd, session_identity, now, args.agent)
             data['_theme_session_aliases'] = [args.instance]
             data['_theme_observer'] = args.instance
             text = theme.render(data, now)

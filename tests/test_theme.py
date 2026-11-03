@@ -23,6 +23,7 @@ class ThemeTest(unittest.TestCase):
         self.environment = patch.dict(os.environ, {'AGENT_THEME_PREFERENCES': str(self.path),
                                       'AGENT_THEME_CAST': '', 'AGENT_THEME_STYLE': '',
                                       'CLAUDE_STATUSLINE_CAST': '', 'CLAUDE_STATUSLINE_STYLE': '',
+                                      'COPILOT_STATUSLINE_CAST': '', 'COPILOT_STATUSLINE_STYLE': '',
                                       'NO_COLOR': '', 'COLUMNS': '180', 'LINES': '30', 'TERM': 'xterm-256color'})
         self.environment.start()
 

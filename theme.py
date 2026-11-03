@@ -19,13 +19,13 @@ def show(target=None):
         profiles = preferences.get('sessions', {}).get(agent, {})
         saved = {}
         for value in (*target.get('aliases', []), identity): saved.update(profiles.get(value, {}))
-        print(f"{agent}:{identity}: cast={saved.get('cast', '<inherit>')}  style={saved.get('style', '<inherit>')}")
+        print(f"{agent}:{identity}: cast={saved.get('cast', '<inherit>')}  style={saved.get('style', '<inherit>')}  rotation={saved.get('rotation', '<inherit>')}  interval={saved.get('interval', '<inherit>')}")
         print('Session overrides take priority over environment and client defaults.')
         return
     for agent in config.AGENTS:
         saved = preferences.get(agent, {})
-        effective = config.effective_preferences(agent, preferences=preferences)
-        print(f"{agent}: cast={effective['cast']}  style={effective['style']}")
+        effective = config.effective_preferences(agent, preferences=preferences, include_visuals=True)
+        print(f"{agent}: cast={effective['cast']}  style={effective['style']}  rotation={effective['rotation']}  interval={effective['interval']}s")
         if any(effective[field] != saved.get(field, 'random') for field in ('cast', 'style')):
             print('  Environment overrides saved preferences for this shell.')
 
@@ -62,10 +62,11 @@ def menu_choice(title, choices, default=None):
 
 def interactive():
     show()
-    choices = [('all', 'Codex + Claude defaults'), ('codex', 'Codex defaults'), ('claude', 'Claude defaults')]
+    choices = [('all', 'All client defaults'), ('codex', 'Codex defaults'), ('claude', 'Claude defaults')]
     choices += [(row, printable(f"Session {row['agent']}:{row['session_id']} · {row.get('cwd', '')}"))
                 for row in sessions.records()]
-    selected = menu_choice('Apply to (default: both client defaults)', choices, 'all')
+    choices.append(('copilot', 'Copilot defaults'))
+    selected = menu_choice('Apply to (default: all client defaults)', choices, 'all')
     target = selected if isinstance(selected, dict) else None
     agent = target['agent'] if target else selected
     cast = menu_choice('Character', [('random', 'Random per session')]+
@@ -91,10 +92,12 @@ def main():
     listing.add_argument('--agent', choices=('all', *config.AGENTS), default='all')
     listing.add_argument('--all', action='store_true', help='Include entries older than two minutes')
     listing.add_argument('--json', action='store_true')
-    commands.add_parser('refresh', help='Upgrade running Codex HUD renderers without restarting Codex')
+    commands.add_parser('refresh', help='Refresh HUD renderers and attach to running tmux Copilot sessions')
     select = commands.add_parser('set', help='Save choices for both agents or one agent')
     select.add_argument('--cast', choices=(*config.catalog(), 'random'))
     select.add_argument('--style', choices=(*config.STYLES, 'random'))
+    select.add_argument('--rotation', choices=('cycle', 'activity'), help='Cycle artwork or follow actual activity')
+    select.add_argument('--interval', type=int, help='Seconds per artwork, 10–3600 (default: 30)')
     select.add_argument('--agent', choices=('all', *config.AGENTS), default='all')
     select.add_argument('--session', help='Target only this session; accepts a unique prefix')
     reset = commands.add_parser('reset', help='Clear saved choices; environment overrides remain active')
@@ -113,7 +116,9 @@ def main():
         elif args.command == 'refresh':
             import theme_refresh
             count = theme_refresh.refresh()
-            print(f'Refreshed {count} Codex HUD renderer(s). Codex processes and tasks were left running.')
+            import copilot_attach
+            attached = copilot_attach.attach_running()
+            print(f'Refreshed {count} HUD renderer(s); attached {attached} Copilot HUD(s). Agent tasks remain running.')
         elif args.command == 'show':
             show(sessions.resolve(args.session, args.agent) if args.session is not None else None)
         else:
@@ -121,7 +126,8 @@ def main():
             config.save_selection(target['agent'] if target else args.agent,
                                   getattr(args, 'cast', None), getattr(args, 'style', None),
                                   reset=args.command == 'reset', session_id=target['session_id'] if target else None,
-                                  session_aliases=target.get('aliases', ()) if target else ())
+                                  session_aliases=target.get('aliases', ()) if target else (),
+                                  rotation=getattr(args, 'rotation', None), interval=getattr(args, 'interval', None))
             print('Saved. Running status lines use the selection on their next refresh.')
             show(target)
     except (OSError, ValueError) as error:

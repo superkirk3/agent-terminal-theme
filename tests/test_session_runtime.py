@@ -58,7 +58,8 @@ class RunningSessionTest(unittest.TestCase):
             def capture(socket, pane):
                 return tmux(socket, 'capture-pane', '-p', '-t', pane)
             overrides = {'AGENT_THEME_PREFERENCES': str(preferences), 'AGENT_THEME_CAST': '',
-                         'AGENT_THEME_STYLE': '', 'CLAUDE_STATUSLINE_CAST': '', 'CLAUDE_STATUSLINE_STYLE': ''}
+                         'AGENT_THEME_STYLE': '', 'AGENT_THEME_ROTATION': 'activity',
+                         'CLAUDE_STATUSLINE_CAST': '', 'CLAUDE_STATUSLINE_STYLE': ''}
             with patch.dict(os.environ, overrides):
                 config.save_selection(cast='luffy', style='mecha')
                 try:

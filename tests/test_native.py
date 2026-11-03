@@ -16,6 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 import native_avatar
 import native_hud
+from sixel_frames import load_frame
 
 spec = importlib.util.spec_from_file_location('native_panel', ROOT/'codex-pane.py')
 panel = importlib.util.module_from_spec(spec)
@@ -23,6 +24,13 @@ spec.loader.exec_module(panel)
 
 
 class NativeTest(unittest.TestCase):
+    def test_all_animation_frames_have_valid_indexed_data(self):
+        for path in (ROOT/'assets/cast').glob('*/*/*.png'):
+            with self.subTest(frame=path.relative_to(ROOT)):
+                w, h, palette, pixels = load_frame(str(path))
+                self.assertEqual(len(pixels), w*h)
+                self.assertTrue(all(value < len(palette) or value == 255 for value in set(pixels)))
+
     def test_native_footer_forwards_preferences_without_stale_tmux_overrides(self):
         commands = []
         def tmux(socket, *args, **kwargs):
