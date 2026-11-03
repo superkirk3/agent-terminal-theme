@@ -109,6 +109,28 @@ class VisualTest(unittest.TestCase):
     setUp = fixtures.ThemeTest.setUp
     tearDown = fixtures.ThemeTest.tearDown
 
+    def test_structured_approval_policy_stays_compact_in_every_layout(self):
+        policy = {'granular': {'sandbox_approval': True, 'rules': False,
+                  'skill_approval': True, 'request_permissions': False, 'mcp_elicitations': False}}
+        state = codex.summarize([{'type': 'turn_context', 'payload': {'approval_policy': policy}}], 0, ('Example', 'high'))
+        self.assertEqual(statusline.permission_label(state['approval']), 'GRANULAR 2/5')
+        data = {'_agent': 'codex', 'session_id': 'approval-example', 'permission_mode': state['approval'],
+                '_text_panel_only': True, '_image_protocol': '', '_theme_register': False}
+        for style in config.STYLES:
+            config.save_selection('codex', cast='saitama', style=style)
+            text = statusline.render(data, now=1000)
+            self.assertIn('granular 2/5', text.lower())
+            self.assertNotIn('SANDBOX', text.upper())
+            self.assertNotIn('FALSE', text.upper())
+            self.assertLessEqual(len(text.splitlines()), 5)
+
+    def test_unknown_policy_structures_do_not_dump_their_contents(self):
+        for policy, label in (({'granular': {'future_category': True}}, 'GRANULAR'),
+                              ({'future_policy': {'private_value': True}}, 'CUSTOM'),
+                              ('on-request', 'ON-REQUEST'), ('never', 'NEVER'),
+                              ('bypassPermissions', 'BYPASS'), (None, 'UNKNOWN')):
+            self.assertEqual(statusline.permission_label(policy), label)
+
     def test_every_ensemble_member_and_animation_is_reachable_while_idle(self):
         for name in ('bleach', 'kimetsu'):
             spec = statusline.load_cast()[name]

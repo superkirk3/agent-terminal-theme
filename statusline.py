@@ -421,6 +421,20 @@ MODES = {"default": "STANDARD", "acceptEdits": "ACCEPT EDITS", "plan": "PLAN",
          "bypassPermissions": "BYPASS", "auto": "AUTO", "dontAsk": "DONT ASK"}
 
 
+def permission_label(value):
+    """Describe approval policy without dumping structured settings into a row."""
+    if isinstance(value, dict):
+        granular = value.get('granular')
+        if not isinstance(granular, dict): return 'CUSTOM'
+        categories = {'sandbox_approval', 'rules', 'skill_approval',
+                      'request_permissions', 'mcp_elicitations'}
+        if set(granular) == categories and all(isinstance(v, bool) for v in granular.values()):
+            return f'GRANULAR {sum(granular.values())}/{len(categories)}'
+        return 'GRANULAR'
+    if not isinstance(value, str): return 'UNKNOWN'
+    return MODES.get(value, clip(value.replace('_', ' ').upper(), 24))
+
+
 def permission_mode(path):
     """Latest permission mode recorded in the transcript.
 
@@ -868,9 +882,9 @@ def render(data, now=None, forced=None):
     home = str(Path.home())
     path = "~" + cwd[len(home):] if cwd == home or cwd.startswith(home + os.sep) else cwd
     git = git_info(cwd)
-    permission = str(data.get("permission_mode") or data.get("permissionMode") or
-                     permission_mode(data.get("transcript_path")) or "default")
-    access = MODES.get(permission, permission.replace("_", " ").upper())
+    permission = (data.get("permission_mode") or data.get("permissionMode") or
+                  permission_mode(data.get("transcript_path")) or "default")
+    access = permission_label(permission)
     q5, q5_reset, q5_pace, q5_ahead = quota_data(rate.get("five_hour"), 18000, now)
     q7, q7_reset, q7_pace, q7_ahead = quota_data(rate.get("seven_day"), 604800, now)
     mood = mood_from_usage(q5, q7)
