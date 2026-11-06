@@ -35,6 +35,8 @@ Windows 示例使用背景色 `#282c34`，与 SIXEL 图片底色一致。使用�
 
 Ghostty/kitty/Rex 的 Codex 使用直接图像放置；Claude 在 Ghostty/kitty 使用不同的占位符定位。如果 Claude 的占位符不可见，使用 `CLAUDE_STATUSLINE_IMAGE=off`。
 
+Rex 中若出现多个人物叠在一起，更新安装并运行 `agent-theme refresh`。新版使用每个显示位置固定的图像编号，在轮播、重载时停止并替换旧动画；隐藏的 tmux 窗口会撤掉自己的图片，恢复可见后再绘制。它也会清理旧版主题留下的已知图像编号，不执行终端全局图片清空。
+
 嵌套布局、切换不同终端附着到同一个 tmux session，以及 CLI/终端更新，都可能影响图像协议。Windows 图片异常时可用 `AGENT_THEME_WINDOWS_TEXT=1 codex`；需要排除整个主题时用 `CODEX_THEME_DISABLE=1 codex`。
 
 ## 恢复会话后出现多套 HUD
